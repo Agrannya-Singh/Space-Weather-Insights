@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo } from "react";
@@ -6,7 +7,7 @@ import { Skeleton } from "../ui/skeleton";
 
 function parseLocation(location: string): [number, number] | null {
   if (!location) return null;
-  // For locations like 'S14W01'
+  // For locations like 'S14W01' or 'N22E12'
   const flrMatch = location.match(/([NS])(\d+)([WE])(\d+)/);
   if (flrMatch) {
     const [, latDir, latStr, lonDir, lonStr] = flrMatch;
@@ -14,22 +15,15 @@ function parseLocation(location: string): [number, number] | null {
     let longitude = parseInt(lonStr, 10);
     if (latDir === 'S') latitude = -latitude;
     if (lonDir === 'W') longitude = -longitude;
-    return [longitude, latitude];
-  }
-
-  // For locations like 'S14W01'
-  const cmeMatch = location.match(/([NS])(\d+)([WE])(\d+)/);
-  if (cmeMatch) {
-    const [, latDir, latStr, lonDir, lonStr] = cmeMatch;
-    let latitude = parseInt(latStr, 10);
-    let longitude = parseInt(lonStr, 10);
-    if (latDir === 'S') latitude = -latitude;
-    if (lonDir === 'W') longitude = -longitude;
+    // Keep longitude within -180 to 180 range
+    if (longitude > 180) longitude = 180;
+    if (longitude < -180) longitude = -180;
     return [longitude, latitude];
   }
 
   return null;
 }
+
 
 type EventMapProps = {
   events: DonkiEvent[];
@@ -57,24 +51,39 @@ export function EventMap({ events, loading }: EventMapProps) {
 
   return (
     <div className="relative w-full h-48 overflow-hidden rounded-lg bg-background">
-      <svg viewBox="0 0 800 400" className="w-full h-full">
-        <image href="/world.svg" x="0" y="0" height="400" width="800" />
+      <svg viewBox="0 0 800 400" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+        <path d="M799.5 200c0 110.5-89.5 200-200 200s-200-89.5-200-200 89.5-200 200-200 200 89.5 200 200z" fill="#333" />
+        <circle cx="400" cy="200" r="199.5" fill="#000" stroke="#666" strokeWidth="1" />
+        <g fill="none" stroke="#fff" strokeWidth="0.5">
+          {Array.from({length: 17}).map((_, i) => (
+            <circle key={`lon-${i}`} cx="400" cy="200" r={(i+1)*200/18} />
+          ))}
+          {Array.from({length: 12}).map((_, i) => (
+            <line key={`lat-${i}`} x1="400" y1="0" x2="400" y2="400" transform={`rotate(${i*30}, 400, 200)`} />
+          ))}
+        </g>
         {points.map(([lon, lat], i) => {
-          const cx = (lon + 180) * (800 / 360);
-          const cy = (90 - lat) * (400 / 180);
+          const r = Math.cos(lat * Math.PI / 180) * 199.5;
+          const x = 400 + r * Math.cos((lon-90) * Math.PI / 180);
+          const y = 200 + r * Math.sin((lon-90) * Math.PI / 180);
+          
+          const z = Math.sin(lat * Math.PI / 180) * 199.5;
+
           return (
             <circle
               key={i}
-              cx={cx}
-              cy={cy}
-              r="5"
-              fill="hsl(var(--accent))"
+              cx={x}
+              cy={y}
+              r={z > 0 ? 5 : 2}
+              fill={z > 0 ? "hsl(var(--accent))" : "hsl(var(--muted))"}
               stroke="hsl(var(--accent-foreground))"
               strokeWidth="1"
               className="animate-pulse"
+              style={{ animationDelay: `${i * 100}ms`}}
             />
           );
         })}
+         <text x="400" y="20" fill="hsl(var(--muted-foreground))" textAnchor="middle" fontSize="12">Solar Flares and CMEs</text>
       </svg>
     </div>
   );
