@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
-import { subDays, format } from "date-fns"
+import { format } from "date-fns"
 import { DonkiEvent } from "@/lib/types"
 import {
   ChartConfig,
@@ -33,7 +33,6 @@ type KpIndexChartProps = {
 
 export function KpIndexChart({ events, loading }: KpIndexChartProps) {
   const chartData = React.useMemo(() => {
-    const threeDaysAgo = subDays(new Date(), 3);
     const allKpIndexes = events.flatMap(event => event.allKpIndex || []);
     if (allKpIndexes.length === 0) return [];
 
@@ -42,7 +41,6 @@ export function KpIndexChart({ events, loading }: KpIndexChartProps) {
             time: new Date(kp.observedTime),
             kpIndex: kp.kpIndex,
         }))
-        .filter(kp => kp.time >= threeDaysAgo)
         .sort((a, b) => a.time.getTime() - b.time.getTime())
         .map(kp => ({
             ...kp,
@@ -57,7 +55,7 @@ export function KpIndexChart({ events, loading }: KpIndexChartProps) {
   if (chartData.length === 0) {
     return (
         <div className="flex items-center justify-center h-48 text-muted-foreground">
-            <p>No Kp-Index data available for the last 3 days.</p>
+            <p>No Kp-Index data available for the selected period.</p>
         </div>
     );
   }

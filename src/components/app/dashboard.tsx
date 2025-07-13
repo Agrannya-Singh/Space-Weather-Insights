@@ -114,7 +114,7 @@ export function Dashboard() {
                  <Card className="bg-card/50">
                     <CardHeader>
                         <CardTitle>Geomagnetic Activity</CardTitle>
-                        <CardDescription>Planetary K-index (Kp) for the last 3 days.</CardDescription>
+                        <CardDescription>Planetary K-index (Kp) for the selected period.</CardDescription>
                     </CardHeader>
                     <CardContent>
                        <KpIndexChart events={gstEvents} loading={loading} />
