@@ -1,9 +1,13 @@
 "use client"
 
+import { useState, useEffect } from "react";
 import { DonkiEvent, EventType, eventTypes } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EventCard } from "./event-card";
+import { Button } from "@/components/ui/button";
+
+const INITIAL_VISIBLE_COUNT = 5;
 
 type EventListProps = {
     events: DonkiEvent[];
@@ -12,7 +16,20 @@ type EventListProps = {
 }
 
 export function EventList({ events, eventType, loading }: EventListProps) {
+    const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+
+    useEffect(() => {
+        setVisibleCount(INITIAL_VISIBLE_COUNT);
+    }, [events, eventType]);
+
     const eventTypeLabel = eventTypes.find(e => e.value === eventType)?.label;
+
+    const handleLoadMore = () => {
+        setVisibleCount(events.length);
+    };
+
+    const displayedEvents = events.slice(0, visibleCount);
+    const hasMore = events.length > visibleCount;
 
     return (
         <div>
@@ -27,8 +44,8 @@ export function EventList({ events, eventType, loading }: EventListProps) {
                             <CardContent><Skeleton className="h-4 w-1/2" /></CardContent>
                         </Card>
                     ))
-                ) : events.length > 0 ? (
-                    events.map((event, index) => (
+                ) : displayedEvents.length > 0 ? (
+                    displayedEvents.map((event, index) => (
                         <EventCard key={`${event.activityID || event.flrID || event.sepID || index}`} event={event} eventType={eventType} />
                     ))
                 ) : (
@@ -39,6 +56,13 @@ export function EventList({ events, eventType, loading }: EventListProps) {
                     </Card>
                 )}
             </div>
+            {hasMore && !loading && (
+                <div className="mt-6 flex justify-center">
+                    <Button onClick={handleLoadMore}>
+                        Load More ({events.length - visibleCount} remaining)
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
