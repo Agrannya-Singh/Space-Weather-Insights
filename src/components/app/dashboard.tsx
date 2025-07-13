@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { DateRange } from "react-day-picker";
-import { subDays, format } from "date-fns";
+import { subDays, format, parseISO } from "date-fns";
 import { DonkiEvent, EventType } from "@/lib/types";
 import { getSpaceWeatherData } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
@@ -79,6 +79,16 @@ export function Dashboard() {
 
   const gstEvents = useMemo(() => events.filter(e => e.allKpIndex), [events]);
 
+  const handleDateChange = (field: 'from' | 'to', value: string) => {
+    const newDate = value ? parseISO(value) : undefined;
+    if (field === 'from') {
+        setDate(prev => ({ from: newDate, to: prev?.to }));
+    } else {
+        setDate(prev => ({ from: prev?.from, to: newDate }));
+    }
+  };
+
+
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <aside className="lg:col-span-3">
@@ -87,7 +97,7 @@ export function Dashboard() {
                     eventType={eventType}
                     setEventType={setEventType}
                     date={date}
-                    setDate={setDate}
+                    setDate={handleDateChange}
                     ipsLocation={ipsLocation}
                     setIpsLocation={setIpsLocation}
                     ipsCatalog={ipsCatalog}

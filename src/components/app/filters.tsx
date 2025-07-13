@@ -1,24 +1,22 @@
 "use client"
 
 import { DateRange } from "react-day-picker"
-import { format, subDays } from "date-fns"
-import { Calendar as CalendarIcon, Search } from "lucide-react"
+import { format } from "date-fns"
+import { Search } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { EventType, eventTypes, ipsCatalogs, ipsLocations } from "@/lib/types"
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 type FiltersProps = {
     eventType: EventType
     setEventType: (type: EventType) => void
     date: DateRange | undefined
-    setDate: (date: DateRange | undefined) => void
+    setDate: (field: 'from' | 'to', value: string) => void
     ipsLocation: string
     setIpsLocation: (loc: string) => void
     ipsCatalog: string
@@ -48,7 +46,7 @@ export function Filters({
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
-                        <label className="text-sm font-medium">Event Type</label>
+                        <Label>Event Type</Label>
                         <Select onValueChange={(v) => setEventType(v as EventType)} defaultValue={eventType}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select event type" />
@@ -61,46 +59,31 @@ export function Filters({
                         </Select>
                     </div>
 
-                    <div>
-                        <label className="text-sm font-medium">Date Range</label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date?.from ? (
-                                        date.to ? (
-                                            <>
-                                                {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
-                                            </>
-                                        ) : (
-                                            format(date.from, "LLL dd, y")
-                                        )
-                                    ) : (
-                                        <span>Pick a date</span>
-                                    )}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    initialFocus
-                                    mode="range"
-                                    defaultMonth={date?.from}
-                                    selected={date}
-                                    onSelect={setDate}
-                                    numberOfMonths={2}
-                                    disabled={(d) => d > new Date() || d < subDays(new Date(), 180)}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div>
+                            <Label htmlFor="start-date">Start Date</Label>
+                            <Input
+                                type="date"
+                                id="start-date"
+                                value={date?.from ? format(date.from, 'yyyy-MM-dd') : ''}
+                                onChange={(e) => setDate('from', e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="end-date">End Date</Label>
+                            <Input
+                                type="date"
+                                id="end-date"
+                                value={date?.to ? format(date.to, 'yyyy-MM-dd') : ''}
+                                onChange={(e) => setDate('to', e.target.value)}
+                            />
+                        </div>
                     </div>
                     
                     {eventType === 'IPS' && (
                         <>
                             <div>
-                                <label className="text-sm font-medium">Location</label>
+                                <Label>Location</Label>
                                 <Select onValueChange={setIpsLocation} defaultValue={ipsLocation}>
                                     <SelectTrigger><SelectValue/></SelectTrigger>
                                     <SelectContent>
@@ -109,7 +92,7 @@ export function Filters({
                                 </Select>
                             </div>
                             <div>
-                                <label className="text-sm font-medium">Catalog</label>
+                                <Label>Catalog</Label>
                                 <Select onValueChange={setIpsCatalog} defaultValue={ipsCatalog}>
                                     <SelectTrigger><SelectValue/></SelectTrigger>
                                     <SelectContent>
