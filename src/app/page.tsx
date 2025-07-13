@@ -33,7 +33,7 @@ export default function Home() {
                                 textAnchor="middle"
                                 fontWeight="bold"
                             >
-                                NASA
+                                SW
                             </text>
                             <path
                                 d="M20,55 Q50,45 80,55"

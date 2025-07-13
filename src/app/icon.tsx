@@ -41,7 +41,7 @@ export default function Icon() {
                 textAnchor="middle"
                 fontWeight="bold"
             >
-                NASA
+                SW
             </text>
             
             <path
