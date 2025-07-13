@@ -37,15 +37,6 @@ export function Dashboard() {
       });
       return;
     }
-
-    if ((date.to.getTime() - date.from.getTime()) / (1000 * 3600 * 24) > 30) {
-        toast({
-            variant: "destructive",
-            title: "Date Range Too Large",
-            description: "Please select a date range of 30 days or less.",
-        });
-        return;
-    }
     
     setLoading(true);
     setEvents([]);
