@@ -1,4 +1,4 @@
-# Firebase Studio
+# Solar Dashboard 
 
 ## Welcome to the Solar Activity Dashboard! ☀️
 
