@@ -12,6 +12,7 @@ import { EventList } from "./event-list";
 import { AiSummary } from "./ai-summary";
 import { EventChart } from "./event-chart";
 import { EventMap } from "./event-map";
+import { KpIndexChart } from "./kp-index-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Dashboard() {
@@ -76,6 +77,8 @@ export function Dashboard() {
     );
   }, [events, searchTerm]);
 
+  const gstEvents = useMemo(() => events.filter(e => e.allKpIndex), [events]);
+
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <aside className="lg:col-span-3">
@@ -92,23 +95,32 @@ export function Dashboard() {
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                 />
+                <AiSummary events={filteredEvents} eventType={eventType}/>
             </div>
         </aside>
 
         <div className="lg:col-span-9 space-y-8">
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-                <AiSummary events={filteredEvents} eventType={eventType}/>
+                 <Card className="bg-card/50">
+                    <CardHeader>
+                        <CardTitle>Geomagnetic Activity</CardTitle>
+                        <CardDescription>Planetary K-index (Kp) for the last 3 days.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                       <KpIndexChart events={gstEvents} loading={loading} />
+                    </CardContent>
+                </Card>
                  <Card className="bg-card/50">
                     <CardHeader>
                         <CardTitle>Data Visualization</CardTitle>
-                        <CardDescription>Visual representation of the event data.</CardDescription>
+                        <CardDescription>Visual representation of the selected event data.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {eventType === 'GST' && <EventChart events={filteredEvents} loading={loading} />}
-                        {eventType === 'FLR' && <EventMap events={filteredEvents} loading={loading} />}
-                        {eventType !== 'GST' && eventType !== 'FLR' && (
+                        {(eventType === 'FLR' || eventType === 'CME') && <EventMap events={filteredEvents} loading={loading} />}
+                        {eventType !== 'GST' && eventType !== 'FLR' && eventType !== 'CME' && (
                             <div className="flex items-center justify-center h-48 text-muted-foreground">
-                                <p>No visualization available for this event type.</p>
+                                <p>No specific visualization available for {eventType}.</p>
                             </div>
                         )}
                     </CardContent>

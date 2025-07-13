@@ -6,17 +6,29 @@ import { Skeleton } from "../ui/skeleton";
 
 function parseLocation(location: string): [number, number] | null {
   if (!location) return null;
-  const match = location.match(/([NS])(\d+)([WE])(\d+)/);
-  if (!match) return null;
+  // For locations like 'S14W01'
+  const flrMatch = location.match(/([NS])(\d+)([WE])(\d+)/);
+  if (flrMatch) {
+    const [, latDir, latStr, lonDir, lonStr] = flrMatch;
+    let latitude = parseInt(latStr, 10);
+    let longitude = parseInt(lonStr, 10);
+    if (latDir === 'S') latitude = -latitude;
+    if (lonDir === 'W') longitude = -longitude;
+    return [longitude, latitude];
+  }
 
-  const [, latDir, latStr, lonDir, lonStr] = match;
-  let latitude = parseInt(latStr, 10);
-  let longitude = parseInt(lonStr, 10);
+  // For locations like 'S14W01'
+  const cmeMatch = location.match(/([NS])(\d+)([WE])(\d+)/);
+  if (cmeMatch) {
+    const [, latDir, latStr, lonDir, lonStr] = cmeMatch;
+    let latitude = parseInt(latStr, 10);
+    let longitude = parseInt(lonStr, 10);
+    if (latDir === 'S') latitude = -latitude;
+    if (lonDir === 'W') longitude = -longitude;
+    return [longitude, latitude];
+  }
 
-  if (latDir === 'S') latitude = -latitude;
-  if (lonDir === 'W') longitude = -longitude;
-  
-  return [longitude, latitude];
+  return null;
 }
 
 type EventMapProps = {
@@ -27,7 +39,7 @@ type EventMapProps = {
 export function EventMap({ events, loading }: EventMapProps) {
   const points = useMemo(() => {
     return events
-      .map(event => parseLocation(event.sourceLocation))
+      .map(event => parseLocation(event.sourceLocation || (event.cmeAnalyses?.[0]?.sourceLocation)))
       .filter((p): p is [number, number] => p !== null);
   }, [events]);
 

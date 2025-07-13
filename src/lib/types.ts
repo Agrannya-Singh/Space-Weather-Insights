@@ -1,4 +1,4 @@
-export type EventType = 'GST' | 'IPS' | 'FLR' | 'SEP' | 'MPC' | 'RBE' | 'HSS' | 'WSA';
+export type EventType = 'GST' | 'IPS' | 'FLR' | 'SEP' | 'MPC' | 'RBE' | 'HSS' | 'WSA' | 'CME';
 
 export interface KpIndex {
     observedTime: string;
@@ -16,6 +16,7 @@ export const eventTypes: { value: EventType, label: string }[] = [
     { value: 'GST', label: 'Geomagnetic Storm' },
     { value: 'IPS', label: 'Interplanetary Shock' },
     { value: 'FLR', label: 'Solar Flare' },
+    { value: 'CME', label: 'Coronal Mass Ejection' },
     { value: 'SEP', label: 'Solar Energetic Particle' },
     { value: 'MPC', label: 'Magnetopause Crossing' },
     { value: 'RBE', label: 'Radiation Belt Enhancement' },

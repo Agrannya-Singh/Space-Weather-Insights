@@ -6,8 +6,8 @@ export default function Home() {
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/90 backdrop-blur-sm">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 <h1 className="text-2xl font-bold font-headline flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-accent"><path d="M15.12 3.65a2 2 0 0 1 2.24 2.24L16.2 15.2a2 2 0 0 1-2.24 1.18 2 2 0 0 1-1.18-2.24Z"/><path d="M16.9 19.88a2 2 0 1 1-2.83 2.83 2 2 0 0 1 2.83-2.83Z"/><path d="m21.5 11.5-1.9 1.9"/><path d="m11.5 21.5-1.9 1.9"/><path d="m2 2 7.5 7.5"/><path d="M14.8 6.2 11.5 9.5"/><path d="M12.5 2.5 10 5"/><path d="M2.5 12.5 5 10"/><path d="M9.8 14.8 6.5 11.5"/></svg>
-                    Space Weather Insights
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-accent"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 4.42 3.58 8 7 8s7-3.58 7-8a7 7 0 0 0-7-7z"/><path d="M12 12a12.3 12.3 0 0 0 6.5 4.5c-1.33 1.8-3.23 3-5.5 3-3.87 0-7-3.13-7-7 0-1.5.48-2.88 1.29-4"/></svg>
+                    Space Weather Dashboard
                 </h1>
             </div>
         </header>

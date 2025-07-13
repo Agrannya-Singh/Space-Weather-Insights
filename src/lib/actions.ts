@@ -19,7 +19,10 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
     const validatedParams = actionSchema.parse(params);
     const { eventType, startDate, endDate, location, catalog } = validatedParams;
 
-    const endpoint = eventType === 'WSA' ? 'WSAEnlilSimulations' : eventType;
+    let endpoint: string = eventType;
+    if (eventType === 'WSA') endpoint = 'WSAEnlilSimulations';
+    if (eventType === 'CME') endpoint = 'CME';
+    
     const url = new URL(`${BASE_URL}/${endpoint}`);
     url.searchParams.append('api_key', API_KEY);
     url.searchParams.append('startDate', startDate);
