@@ -10,6 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Filters } from "./filters";
 import { EventList } from "./event-list";
 import { AiSummary } from "./ai-summary";
+import { EventChart } from "./event-chart";
+import { EventMap } from "./event-map";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Dashboard() {
   const [eventType, setEventType] = useState<EventType>("GST");
@@ -102,7 +105,24 @@ export function Dashboard() {
         </aside>
 
         <div className="lg:col-span-9 space-y-8">
-            <AiSummary events={filteredEvents} eventType={eventType}/>
+            <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+                <AiSummary events={filteredEvents} eventType={eventType}/>
+                 <Card className="bg-card/50">
+                    <CardHeader>
+                        <CardTitle>Data Visualization</CardTitle>
+                        <CardDescription>Visual representation of the event data.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {eventType === 'GST' && <EventChart events={filteredEvents} loading={loading} />}
+                        {eventType === 'FLR' && <EventMap events={filteredEvents} loading={loading} />}
+                        {eventType !== 'GST' && eventType !== 'FLR' && (
+                            <div className="flex items-center justify-center h-48 text-muted-foreground">
+                                <p>No visualization available for this event type.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
             <EventList 
                 events={filteredEvents}
                 eventType={eventType}

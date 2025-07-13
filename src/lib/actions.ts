@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { EventType } from './types';
 
-const API_KEY = process.env.NASA_API_KEY || 'DEMO_KEY';
+const API_KEY = process.env.NASA_API_KEY || 'R8ZoVAsKe3MhKM0vdsrOg5ppoy8xHSlbPHM4UI1A';
 const BASE_URL = 'https://api.nasa.gov/DONKI';
 
 const actionSchema = z.object({

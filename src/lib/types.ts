@@ -1,7 +1,15 @@
 export type EventType = 'GST' | 'IPS' | 'FLR' | 'SEP' | 'MPC' | 'RBE' | 'HSS' | 'WSA';
 
+export interface KpIndex {
+    observedTime: string;
+    kpIndex: number;
+    source: string;
+}
+
 export interface DonkiEvent {
   [key: string]: any;
+  allKpIndex?: KpIndex[];
+  sourceLocation?: string;
 }
 
 export const eventTypes: { value: EventType, label: string }[] = [
