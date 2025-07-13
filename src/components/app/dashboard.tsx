@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Filters } from "./filters";
 import { EventList } from "./event-list";
 import { AiSummary } from "./ai-summary";
-import { EventChart } from "./event-chart";
 import { EventMap } from "./event-map";
 import { KpIndexChart } from "./kp-index-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,23 +109,14 @@ export function Dashboard() {
         </aside>
 
         <div className="lg:col-span-9 space-y-8">
-            <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-                 <Card className="bg-card/50">
-                    <CardHeader>
-                        <CardTitle>Geomagnetic Activity</CardTitle>
-                        <CardDescription>Planetary K-index (Kp) for the selected period.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                       <KpIndexChart events={gstEvents} loading={loading} />
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 gap-8">
                  <Card className="bg-card/50">
                     <CardHeader>
                         <CardTitle>Data Visualization</CardTitle>
                         <CardDescription>Visual representation of the selected event data.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {eventType === 'GST' && <EventChart events={filteredEvents} loading={loading} />}
+                        {eventType === 'GST' && <KpIndexChart events={gstEvents} loading={loading} />}
                         {(eventType === 'FLR' || eventType === 'CME') && <EventMap events={filteredEvents} loading={loading} />}
                         {eventType !== 'GST' && eventType !== 'FLR' && eventType !== 'CME' && (
                             <div className="flex items-center justify-center h-48 text-muted-foreground">

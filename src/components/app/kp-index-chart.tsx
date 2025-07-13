@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer, Cell } from "recharts"
 import { format } from "date-fns"
 import { DonkiEvent } from "@/lib/types"
 import {
@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 const chartConfig = {
   kpIndex: {
     label: "Kp-Index",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
 
@@ -45,6 +45,7 @@ export function KpIndexChart({ events, loading }: KpIndexChartProps) {
         .map(kp => ({
             ...kp,
             time: format(kp.time, "MMM d, HH:mm"),
+            fill: getBarColor(kp.kpIndex)
         }));
   }, [events]);
 
@@ -72,7 +73,7 @@ export function KpIndexChart({ events, loading }: KpIndexChartProps) {
                 />
                 <Bar dataKey="kpIndex" radius={2}>
                     {chartData.map((entry, index) => (
-                        <rect key={`cell-${index}`} fill={getBarColor(entry.kpIndex)} />
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                 </Bar>
             </BarChart>
