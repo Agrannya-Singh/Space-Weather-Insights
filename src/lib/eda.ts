@@ -203,14 +203,7 @@ export function analyzeDataset(rows: any[]): EdaResult {
   // Correlation (sampled) for numeric fields
   const numericFields = fields.filter(f => f.numeric && Number.isFinite(f.numeric.min) && Number.isFinite(f.numeric.max));
   if (numericFields.length >= 2 && rowCount > 0) {
-    const maxSample = 2000;
-    const idxs = Array.from({ length: rowCount }, (_, i) => i);
-    if (rowCount > maxSample) {
-      // reservoir-like simple downsample
-      const step = Math.ceil(rowCount / maxSample);
-      for (let i = idxs.length - 1; i >= 0; i--) if (i % step !== 0) idxs.splice(i, 1);
-    }
-    const cols = numericFields.map(f => idxs.map(i => tryParseNumber(rows[i]?.[f.field]) ?? NaN).filter(n => Number.isFinite(n)));
+    const cols = numericFields.map(f => rows.map(r => tryParseNumber(r?.[f.field]) ?? NaN).filter(n => Number.isFinite(n)));
     const m = numericFields.length;
     const matrix: number[][] = Array.from({ length: m }, () => Array(m).fill(1));
     for (let i = 0; i < m; i++) {
@@ -222,7 +215,7 @@ export function analyzeDataset(rows: any[]): EdaResult {
         matrix[i][j] = matrix[j][i] = corr;
       }
     }
-    return { rowCount, fields, detectedTimeField, correlation: { fields: numericFields.map(f => f.field), matrix, sampled: idxs.length } };
+    return { rowCount, fields, detectedTimeField, correlation: { fields: numericFields.map(f => f.field), matrix, sampled: rowCount } };
   }
 
   return { rowCount, fields, detectedTimeField };
