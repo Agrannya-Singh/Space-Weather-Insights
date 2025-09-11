@@ -47,6 +47,13 @@ This project proudly utilizes data from the NASA Space Weather Database of Notif
     4.  Your API key will be displayed on the screen and also sent to your email address.
 
 We extend our sincere gratitude to NASA for providing the invaluable data through the DONKI database.
+<img width="1838" height="916" alt="image" src="https://github.com/user-attachments/assets/072f5374-f35e-472f-acb7-62b2aeef87d1" />
+
+<img width="1714" height="906" alt="image" src="https://github.com/user-attachments/assets/1c09007c-20ec-4023-8b18-5cf4294aee5c" />
+
+<img width="1730" height="907" alt="image" src="https://github.com/user-attachments/assets/49eb9731-d9fc-4389-a238-3b21436d3b85" />
+<img width="1734" height="871" alt="image" src="https://github.com/user-attachments/assets/e45ff0e6-69c0-41db-92be-0da22959a7e9" />
+
 
 
 ---
