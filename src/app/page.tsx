@@ -1,6 +1,7 @@
 import { Dashboard } from "@/components/app/dashboard";
 import { EdaLinkButton } from "@/components/app/eda-link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function Home() {
   return (
@@ -71,6 +72,83 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+        </section>
+        {/* What/Why/How */}
+        <section className="container mx-auto px-4 pb-10 grid gap-6 md:grid-cols-3">
+            <Card>
+                <CardHeader>
+                    <CardTitle>What</CardTitle>
+                    <CardDescription>A modern web app to explore space‑weather events from NASA DONKI with instant, automatic EDA and AI summaries.</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    Track CMEs, solar flares, geomagnetic storms, and more with interactive charts and maps.
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Why</CardTitle>
+                    <CardDescription>Make raw space‑weather data understandable for enthusiasts, researchers, and builders.</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    The app surfaces patterns, correlations, and anomalies automatically so you can focus on insights.
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>How</CardTitle>
+                    <CardDescription>Next.js + TypeScript UI with a custom EDA engine that reacts to your filters and searches.</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    EDA computes type inference, missingness, numeric stats, outliers, time series, scatter, and correlation.
+                </CardContent>
+            </Card>
+        </section>
+
+        {/* Tech Stack & API Key */}
+        <section className="container mx-auto px-4 pb-10 grid gap-6 md:grid-cols-2">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Tech Stack</CardTitle>
+                    <CardDescription>The tools used to build Space Weather Insights</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>Next.js (App Router), TypeScript, Tailwind, Shadcn UI</li>
+                        <li>Recharts for charts and visualizations</li>
+                        <li>Custom TypeScript EDA utilities</li>
+                        <li>Genkit (Gemini) for AI summaries with EDA context</li>
+                        <li>Docker and Jenkins for CI/CD</li>
+                    </ul>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>NASA API Key</CardTitle>
+                    <CardDescription>Use your own key to increase limits</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    <ol className="list-decimal pl-5 space-y-1">
+                        <li>Request a key at <a className="underline" href="https://api.nasa.gov" target="_blank" rel="noreferrer">api.nasa.gov</a></li>
+                        <li>Create an `.env` file with: <code className="ml-1">NASA_API_KEY=YOUR_KEY</code></li>
+                        <li>Restart dev server or redeploy with the env var set</li>
+                    </ol>
+                </CardContent>
+            </Card>
+        </section>
+
+        {/* GitHub CTA */}
+        <section className="container mx-auto px-4 pb-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Open Source</CardTitle>
+                    <CardDescription>Star or contribute to the project on GitHub</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild>
+                        <a href="https://github.com/Agrannya-Singh/Space-Weather-Insights" target="_blank" rel="noreferrer">View Repository</a>
+                    </Button>
+                </CardContent>
+            </Card>
         </section>
         <main className="container mx-auto p-4 md:p-10">
             <Dashboard />
