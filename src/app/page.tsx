@@ -4,7 +4,7 @@ import { EdaLinkButton } from "@/components/app/eda-link";
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/90 backdrop-blur-sm">
+        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/70 backdrop-blur-xl">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 <h1 className="text-2xl font-bold font-headline flex items-center gap-2">
                     <div
@@ -12,7 +12,7 @@ export default function Home() {
                             width: '28px',
                             height: '28px',
                             borderRadius: '50%',
-                            background: '#0B3D91',
+                            background: 'linear-gradient(135deg, #0B3D91 0%, #34d399 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -24,7 +24,7 @@ export default function Home() {
                             viewBox="0 0 100 100"
                             xmlns="http://www.w3.org/2000/svg"
                         >
-                            <circle cx="50" cy="50" r="48" fill="#0B3D91" stroke="#FFFFFF" strokeWidth="2" />
+                            <circle cx="50" cy="50" r="48" fill="transparent" stroke="#FFFFFF" strokeWidth="2" />
                             <text
                                 x="50"
                                 y="58"
@@ -45,7 +45,7 @@ export default function Home() {
                             />
                             <path
                                 d="M15 45 L 85 45"
-                                stroke="#FC3D21"
+                                stroke="#f59e0b"
                                 strokeWidth="8"
                                 strokeLinecap="round"
                                 transform="rotate(15, 50, 50)"
