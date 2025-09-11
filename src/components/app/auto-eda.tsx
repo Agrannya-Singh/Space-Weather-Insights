@@ -5,6 +5,8 @@ import { analyzeDataset, EdaResult } from "@/lib/eda";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, Scatter, ScatterChart, Tooltip as ReTooltip, XAxis, YAxis } from "recharts";
+import { Button } from "@/components/ui/button";
+import { downloadSvgChartAsPng } from "@/lib/utils";
 
 type EventType = 'GST' | 'IPS' | 'FLR' | 'SEP' | 'MPC' | 'RBE' | 'HSS' | 'WSA' | 'CME';
 
@@ -140,7 +142,13 @@ export function AutoEda({ data, eventType }: Props) {
       {firstNumeric && histogram.length > 0 && (
         <Card className="bg-card/50">
           <CardHeader>
-            <CardTitle>Histogram: {firstNumeric.field}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Histogram: {firstNumeric.field}</CardTitle>
+              <Button size="sm" variant="outline" onClick={(e) => {
+                const svg = (e.currentTarget.closest('div')?.parentElement?.parentElement?.querySelector('svg')) as SVGSVGElement | null;
+                if (svg) downloadSvgChartAsPng(svg, `histogram-${firstNumeric.field}`);
+              }}>Download PNG</Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-[220px] w-full">
@@ -161,7 +169,13 @@ export function AutoEda({ data, eventType }: Props) {
       {timeSeries.length > 0 && (
         <Card className="bg-card/50">
           <CardHeader>
-            <CardTitle>Events Over Time</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Events Over Time</CardTitle>
+              <Button size="sm" variant="outline" onClick={(e) => {
+                const svg = (e.currentTarget.closest('div')?.parentElement?.parentElement?.querySelector('svg')) as SVGSVGElement | null;
+                if (svg) downloadSvgChartAsPng(svg, `time-series`);
+              }}>Download PNG</Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-[220px] w-full">
@@ -180,7 +194,13 @@ export function AutoEda({ data, eventType }: Props) {
       {scatter && (
         <Card className="bg-card/50">
           <CardHeader>
-            <CardTitle>Scatter: {scatter.xField} vs {scatter.yField}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Scatter: {scatter.xField} vs {scatter.yField}</CardTitle>
+              <Button size="sm" variant="outline" onClick={(e) => {
+                const svg = (e.currentTarget.closest('div')?.parentElement?.parentElement?.querySelector('svg')) as SVGSVGElement | null;
+                if (svg) downloadSvgChartAsPng(svg, `scatter-${scatter.xField}-${scatter.yField}`);
+              }}>Download PNG</Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-[240px] w-full">
@@ -199,7 +219,27 @@ export function AutoEda({ data, eventType }: Props) {
       {result.correlation && result.correlation.fields.length >= 2 && (
         <Card className="bg-card/50">
           <CardHeader>
-            <CardTitle>Correlation Heatmap (sampled {result.correlation.sampled} rows)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Correlation Heatmap (sampled {result.correlation.sampled} rows)</CardTitle>
+              <Button size="sm" variant="outline" onClick={(e) => {
+                const table = e.currentTarget.closest('div')?.parentElement?.parentElement?.querySelector('table') as HTMLTableElement | null;
+                if (!table) return;
+                // Convert table to PNG via SVG wrapper
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                const bbox = table.getBoundingClientRect();
+                svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                svg.setAttribute('width', String(bbox.width));
+                svg.setAttribute('height', String(bbox.height));
+                const foreign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+                foreign.setAttribute('width', '100%');
+                foreign.setAttribute('height', '100%');
+                const clone = table.cloneNode(true) as HTMLElement;
+                clone.style.background = 'transparent';
+                foreign.appendChild(clone);
+                svg.appendChild(foreign);
+                downloadSvgChartAsPng(svg as unknown as SVGSVGElement, 'correlation-heatmap');
+              }}>Download PNG</Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="overflow-auto">
