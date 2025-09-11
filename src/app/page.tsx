@@ -1,4 +1,5 @@
 import { Dashboard } from "@/components/app/dashboard";
+import { EdaLinkButton } from "@/components/app/eda-link";
 
 export default function Home() {
   return (
@@ -53,6 +54,7 @@ export default function Home() {
                     </div>
                     Space Weather Dashboard
                 </h1>
+                <EdaLinkButton />
             </div>
         </header>
         <main className="container mx-auto p-4 md:p-8">

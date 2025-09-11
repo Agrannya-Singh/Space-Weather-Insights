@@ -27,3 +27,7 @@
 
 # IDE
 .vscode/
+
+# Resume entries (local only)
+resume_entry.ms
+resume_entry.md

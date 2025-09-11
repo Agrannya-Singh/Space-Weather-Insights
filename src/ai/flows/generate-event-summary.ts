@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { analyzeDataset } from '@/lib/eda';
 
 const GenerateEventSummaryInputSchema = z.object({
   eventData: z.string().describe('The JSON string of space weather events data from the DONKI API.'),
@@ -29,11 +30,12 @@ const prompt = ai.definePrompt({
   name: 'generateEventSummaryPrompt',
   input: {schema: GenerateEventSummaryInputSchema},
   output: {schema: GenerateEventSummaryOutputSchema},
-  prompt: `You are an expert space weather analyst. Please provide a concise summary of the following space weather events data:
+  prompt: `You are an expert space weather analyst. Provide a concise summary of the following space weather events. Use the provided EDA context to highlight trends, distributions, and anomalies.
 
-  {{eventData}}
-  
-  Focus on key details, such as event types, dates, locations, and potential impacts.
+DATA:
+{{eventData}}
+
+Focus on: event types, dates, locations, intensities, and potential impacts.
 `,
 });
 
@@ -44,7 +46,19 @@ const generateEventSummaryFlow = ai.defineFlow(
     outputSchema: GenerateEventSummaryOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    // Build lightweight EDA context for the AI (top-level stats only)
+    let edaSnippet = '';
+    try {
+      const parsed = JSON.parse(input.eventData);
+      if (Array.isArray(parsed)) {
+        const eda = analyzeDataset(parsed.slice(0, 200));
+        const numeric = eda.fields.filter(f => !!f.numeric).slice(0, 3).map(f => ({ field: f.field, min: f.numeric!.min, max: f.numeric!.max, mean: f.numeric!.mean }));
+        const categorical = eda.fields.filter(f => !!f.categorical).slice(0, 2).map(f => ({ field: f.field, top: (f.categorical ?? []).slice(0, 5) }));
+        edaSnippet = `EDA rows=${eda.rowCount}, fields=${eda.fields.length}, timeField=${eda.detectedTimeField}; numeric=${JSON.stringify(numeric)}, categorical=${JSON.stringify(categorical)}`;
+      }
+    } catch {}
+
+    const {output} = await prompt({ eventData: `${input.eventData}\n\nEDA:${edaSnippet}` });
     return output!;
   }
 );

@@ -6,6 +6,21 @@ import { EventType } from './types';
 const API_KEY = process.env.NASA_API_KEY || 'R8ZoVAsKe3MhKM0vdsrOg5ppoy8xHSlbPHM4UI1A';
 const BASE_URL = 'https://api.nasa.gov/DONKI';
 
+// Centralized mapping to avoid redundant conditional endpoint handling
+const EVENT_TYPE_TO_ENDPOINT: Record<string, string> = {
+  // Direct mappings (endpoint name is identical)
+  GST: 'GST',
+  IPS: 'IPS',
+  FLR: 'FLR',
+  SEP: 'SEP',
+  MPC: 'MPC',
+  RBE: 'RBE',
+  HSS: 'HSS',
+  CME: 'CME',
+  // Special cases
+  WSA: 'WSAEnlilSimulations',
+};
+
 const actionSchema = z.object({
   eventType: z.custom<EventType>(),
   startDate: z.string(),
@@ -19,9 +34,7 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
     const validatedParams = actionSchema.parse(params);
     const { eventType, startDate, endDate, location, catalog } = validatedParams;
 
-    let endpoint: string = eventType;
-    if (eventType === 'WSA') endpoint = 'WSAEnlilSimulations';
-    if (eventType === 'CME') endpoint = 'CME';
+    const endpoint = EVENT_TYPE_TO_ENDPOINT[eventType] ?? eventType;
     
     const url = new URL(`${BASE_URL}/${endpoint}`);
     url.searchParams.append('api_key', API_KEY);
@@ -29,8 +42,8 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
     url.searchParams.append('endDate', endDate);
 
     if (eventType === 'IPS') {
-      if (location) url.searchParams.append('location', location);
-      if (catalog) url.searchParams.append('catalog', catalog);
+      if (location && location !== 'ALL') url.searchParams.append('location', location);
+      if (catalog && catalog !== 'ALL') url.searchParams.append('catalog', catalog);
     }
     
     const response = await fetch(url.toString());

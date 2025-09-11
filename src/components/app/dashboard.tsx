@@ -13,6 +13,7 @@ import { AiSummary } from "./ai-summary";
 import { EventMap } from "./event-map";
 import { KpIndexChart } from "./kp-index-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AutoEda } from "./auto-eda";
 
 export function Dashboard() {
   const [eventType, setEventType] = useState<EventType>("GST");
@@ -125,6 +126,11 @@ export function Dashboard() {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Automatic EDA shown for any fetched dataset */}
+                {!!filteredEvents.length && (
+                  <AutoEda data={filteredEvents} />
+                )}
             </div>
             <EventList 
                 events={filteredEvents}

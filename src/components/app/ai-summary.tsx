@@ -30,7 +30,7 @@ export function AiSummary({ events }: AiSummaryProps) {
         setLoading(true);
         setSummary('');
         try {
-            const eventData = JSON.stringify(events.slice(0, 10), null, 2);
+            const eventData = JSON.stringify(events.slice(0, 50), null, 2);
             const result = await generateEventSummary({ eventData });
             setSummary(result.summary);
         } catch (error) {
