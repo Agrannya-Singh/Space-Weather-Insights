@@ -106,6 +106,17 @@ export default function EdaPage() {
     return arr;
   }, [result, rows]);
 
+  const handleDownloadJson = () => {
+    if (!result) return;
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'eda_result.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="container mx-auto p-4 md:p-8 space-y-6">
       <h2 className="text-2xl font-bold">Exploratory Data Analysis</h2>
@@ -146,12 +157,16 @@ export default function EdaPage() {
             <TabsTrigger value="numeric">Numeric</TabsTrigger>
             <TabsTrigger value="categorical">Categorical</TabsTrigger>
             <TabsTrigger value="time">Time Series</TabsTrigger>
+            <TabsTrigger value="correlation">Correlation</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Dataset Summary</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Dataset Summary</CardTitle>
+                  <Button variant="outline" onClick={handleDownloadJson}>Download EDA JSON</Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -277,6 +292,48 @@ export default function EdaPage() {
               </Card>
             ) : (
               <div className="text-sm text-muted-foreground">No time field detected.</div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="correlation" className="space-y-4">
+            {result.correlation && result.correlation.fields.length >= 2 ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Correlation Heatmap (sampled {result.correlation.sampled} rows)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-auto">
+                    <table className="text-xs">
+                      <thead>
+                        <tr>
+                          <th className="p-1" />
+                          {result.correlation.fields.map((f) => (
+                            <th key={f} className="p-1 text-left whitespace-nowrap">{f}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.correlation.matrix.map((row, i) => (
+                          <tr key={i}>
+                            <td className="p-1 pr-2 font-medium whitespace-nowrap">{result.correlation!.fields[i]}</td>
+                            {row.map((val, j) => {
+                              const v = isFinite(val) ? val : 0;
+                              const color = v >= 0 ? `rgba(16, 185, 129, ${Math.abs(v)})` : `rgba(244, 63, 94, ${Math.abs(v)})`;
+                              return (
+                                <td key={j} className="p-1 text-center" style={{ backgroundColor: color }}>
+                                  {isFinite(val) ? v.toFixed(2) : '—'}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="text-sm text-muted-foreground">Not enough numeric fields for correlation.</div>
             )}
           </TabsContent>
         </Tabs>

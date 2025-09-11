@@ -24,6 +24,11 @@ export interface EdaResult {
   rowCount: number;
   fields: FieldSummary[];
   detectedTimeField?: string;
+  correlation?: {
+    fields: string[];
+    matrix: number[][]; // pearson r in [-1,1]
+    sampled: number;
+  };
 }
 
 function tryParseNumber(value: any): number | null {
@@ -115,6 +120,22 @@ function stdDev(numbers: number[], mean: number): number {
   return Math.sqrt(variance);
 }
 
+function pearsonCorrelation(x: number[], y: number[]): number {
+  const n = Math.min(x.length, y.length);
+  if (n < 2) return NaN;
+  let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, sumYY = 0;
+  for (let i = 0; i < n; i++) {
+    const xi = x[i];
+    const yi = y[i];
+    sumX += xi; sumY += yi; sumXY += xi * yi; sumXX += xi * xi; sumYY += yi * yi;
+  }
+  const cov = sumXY - (sumX * sumY) / n;
+  const varX = sumXX - (sumX * sumX) / n;
+  const varY = sumYY - (sumY * sumY) / n;
+  const denom = Math.sqrt(varX * varY);
+  return denom === 0 ? NaN : cov / denom;
+}
+
 export function analyzeDataset(rows: any[]): EdaResult {
   if (!Array.isArray(rows)) return { rowCount: 0, fields: [] };
   const rowCount = rows.length;
@@ -177,6 +198,31 @@ export function analyzeDataset(rows: any[]): EdaResult {
     }
 
     fields.push(summary);
+  }
+
+  // Correlation (sampled) for numeric fields
+  const numericFields = fields.filter(f => f.numeric && Number.isFinite(f.numeric.min) && Number.isFinite(f.numeric.max));
+  if (numericFields.length >= 2 && rowCount > 0) {
+    const maxSample = 2000;
+    const idxs = Array.from({ length: rowCount }, (_, i) => i);
+    if (rowCount > maxSample) {
+      // reservoir-like simple downsample
+      const step = Math.ceil(rowCount / maxSample);
+      for (let i = idxs.length - 1; i >= 0; i--) if (i % step !== 0) idxs.splice(i, 1);
+    }
+    const cols = numericFields.map(f => idxs.map(i => tryParseNumber(rows[i]?.[f.field]) ?? NaN).filter(n => Number.isFinite(n)));
+    const m = numericFields.length;
+    const matrix: number[][] = Array.from({ length: m }, () => Array(m).fill(1));
+    for (let i = 0; i < m; i++) {
+      for (let j = i + 1; j < m; j++) {
+        const a = cols[i];
+        const b = cols[j];
+        const n = Math.min(a.length, b.length);
+        const corr = n >= 2 ? pearsonCorrelation(a.slice(0, n), b.slice(0, n)) : NaN;
+        matrix[i][j] = matrix[j][i] = corr;
+      }
+    }
+    return { rowCount, fields, detectedTimeField, correlation: { fields: numericFields.map(f => f.field), matrix, sampled: idxs.length } };
   }
 
   return { rowCount, fields, detectedTimeField };

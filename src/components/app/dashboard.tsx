@@ -129,7 +129,7 @@ export function Dashboard() {
 
                 {/* Automatic EDA shown for any fetched dataset */}
                 {!!filteredEvents.length && (
-                  <AutoEda data={filteredEvents} />
+                  <AutoEda data={filteredEvents} eventType={eventType} />
                 )}
             </div>
             <EventList 

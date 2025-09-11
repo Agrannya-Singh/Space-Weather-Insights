@@ -4,22 +4,44 @@ import { useMemo } from "react";
 import { analyzeDataset, EdaResult } from "@/lib/eda";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, Scatter, ScatterChart, Tooltip as ReTooltip, XAxis, YAxis, ZAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, Scatter, ScatterChart, Tooltip as ReTooltip, XAxis, YAxis } from "recharts";
+
+type EventType = 'GST' | 'IPS' | 'FLR' | 'SEP' | 'MPC' | 'RBE' | 'HSS' | 'WSA' | 'CME';
 
 interface Props {
   data: any[];
+  eventType?: EventType;
 }
 
-export function AutoEda({ data }: Props) {
+export function AutoEda({ data, eventType }: Props) {
   const result: EdaResult | null = useMemo(() => {
     if (!data || data.length === 0) return null;
     return analyzeDataset(data);
   }, [data]);
 
+  // Event-type presets: prefer certain numeric fields if present
+  const preferredNumericOrder = useMemo(() => {
+    switch (eventType) {
+      case 'CME':
+        return ['speed', 'latitude', 'longitude', 'halfAngle', 'width'];
+      case 'FLR':
+        return ['xrayClass', 'class', 'intensity', 'peak', 'duration'];
+      case 'GST':
+        return ['kpIndex', 'kp', 'apIndex', 'dst', 'strength'];
+      default:
+        return ['speed', 'magnitude', 'intensity', 'index', 'value'];
+    }
+  }, [eventType]);
+
   const firstNumeric = useMemo(() => {
     if (!result) return undefined;
+    // try presets by substring match, else fall back to first numeric
+    for (const key of preferredNumericOrder) {
+      const f = result.fields.find((x) => x.numeric && x.field.toLowerCase().includes(key.toLowerCase()));
+      if (f) return f;
+    }
     return result.fields.find((f) => f.numeric);
-  }, [result]);
+  }, [result, preferredNumericOrder]);
 
   const histogram = useMemo(() => {
     if (!result || !firstNumeric?.numeric) return [] as { name: string; count: number }[];
@@ -39,6 +61,18 @@ export function AutoEda({ data }: Props) {
     }
     return bins;
   }, [data, result, firstNumeric]);
+
+  // Outlier detection via z-score > 3 for the chosen numeric field
+  const outlierSummary = useMemo(() => {
+    if (!firstNumeric?.numeric) return undefined as undefined | { field: string; total: number; outliers: number };
+    const field = firstNumeric.field;
+    const values = data.map((r) => Number(r?.[field])).filter((n) => Number.isFinite(n));
+    const mean = firstNumeric.numeric.mean;
+    const sd = firstNumeric.numeric.stddev || 0;
+    if (!isFinite(mean) || sd === 0) return { field, total: values.length, outliers: 0 };
+    const outliers = values.filter((v) => Math.abs((v - mean) / sd) > 3).length;
+    return { field, total: values.length, outliers };
+  }, [data, firstNumeric]);
 
   // Top categorical chart removed per request
 
@@ -93,6 +127,12 @@ export function AutoEda({ data }: Props) {
               <div className="text-sm text-muted-foreground">Time Field</div>
               <div className="text-xl font-semibold">{result.detectedTimeField ?? '—'}</div>
             </div>
+            {outlierSummary && (
+              <div>
+                <div className="text-sm text-muted-foreground">Outliers ({outlierSummary.field})</div>
+                <div className="text-xl font-semibold">{outlierSummary.outliers} / {outlierSummary.total}</div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -152,6 +192,45 @@ export function AutoEda({ data }: Props) {
                 <Scatter data={scatter.points} fill="#6366f1" />
               </ScatterChart>
             </ChartContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {result.correlation && result.correlation.fields.length >= 2 && (
+        <Card className="bg-card/50">
+          <CardHeader>
+            <CardTitle>Correlation Heatmap (sampled {result.correlation.sampled} rows)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-auto">
+              <table className="text-xs">
+                <thead>
+                  <tr>
+                    <th className="p-1" />
+                    {result.correlation.fields.map((f) => (
+                      <th key={f} className="p-1 text-left whitespace-nowrap">{f}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.correlation.matrix.map((row, i) => (
+                    <tr key={i}>
+                      <td className="p-1 pr-2 font-medium whitespace-nowrap">{result.correlation!.fields[i]}</td>
+                      {row.map((val, j) => {
+                        const v = isFinite(val) ? val : 0;
+                        const intensity = Math.round(Math.abs(v) * 255);
+                        const color = v >= 0 ? `rgba(16, 185, 129, ${Math.abs(v)})` : `rgba(244, 63, 94, ${Math.abs(v)})`;
+                        return (
+                          <td key={j} className="p-1 text-center" style={{ backgroundColor: color }}>
+                            {isFinite(val) ? v.toFixed(2) : '—'}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       )}
