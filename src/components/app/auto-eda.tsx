@@ -40,12 +40,7 @@ export function AutoEda({ data }: Props) {
     return bins;
   }, [data, result, firstNumeric]);
 
-  const topCategorical = useMemo(() => {
-    if (!result) return undefined as undefined | { field: string; values: { value: string; count: number }[] };
-    const f = result.fields.find((x) => x.categorical && (x.type === 'string' || x.type === 'boolean' || x.type === 'integer'));
-    if (!f) return undefined;
-    return { field: f.field, values: (f.categorical ?? []).slice(0, 12) };
-  }, [result]);
+  // Top categorical chart removed per request
 
   const timeSeries = useMemo(() => {
     if (!result?.detectedTimeField) return [] as { time: string; count: number }[];
@@ -121,24 +116,7 @@ export function AutoEda({ data }: Props) {
         </Card>
       )}
 
-      {topCategorical && topCategorical.values.length > 0 && (
-        <Card className="bg-card/50">
-          <CardHeader>
-            <CardTitle>Top Categories: {topCategorical.field}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={{}} className="h-[220px] w-full">
-              <BarChart data={topCategorical.values}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="value" tick={{ fontSize: 12 }} interval={0} angle={-15} height={50} />
-                <YAxis />
-                <ReTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" fill="#34d399" />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      )}
+      {/* Top categories chart removed */}
 
       {timeSeries.length > 0 && (
         <Card className="bg-card/50">
