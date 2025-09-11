@@ -1,7 +1,25 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, LineChart, Brain, UploadCloud, ArrowRight } from "lucide-react";
+import { Sparkles, LineChart, Brain, UploadCloud, ArrowRight, Telescope, Sun, Wind } from "lucide-react";
+
+const dataTypes = [
+    {
+        icon: <Telescope className="h-6 w-6 text-accent" />,
+        title: "Coronal Mass Ejections (CMEs)",
+        description: "Explore massive eruptions of plasma and magnetic fields from the Sun's corona.",
+    },
+    {
+        icon: <Sun className="h-6 w-6 text-accent" />,
+        title: "Solar Flares",
+        description: "Analyze intense bursts of radiation originating from the release of magnetic energy on the Sun.",
+    },
+    {
+        icon: <Wind className="h-6 w-6 text-accent" />,
+        title: "Geomagnetic Storms",
+        description: "Investigate disturbances in Earth's magnetosphere caused by solar wind shockwaves.",
+    },
+];
 
 export default function ExplanationPage() {
   return (
@@ -13,14 +31,13 @@ export default function ExplanationPage() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-secondary/50 px-3 py-1 text-xs text-secondary-foreground mb-4">
               <Sparkles size={14} />
-              Built for space weather enthusiasts
+              Advanced Analysis for Space Weather Data
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-              Understand Solar Activity with an Automatic EDA Engine
+              From Raw Data to Actionable Insights, Instantly
             </h1>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Space Weather Insights turns raw NASA DONKI events into instant, interactive insights. Filter, explore, and
-              export—no setup required.
+              Our platform transforms raw NASA DONKI events into immediate, interactive insights. Filter, explore, and export your findings without any setup.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/">
@@ -39,61 +56,63 @@ export default function ExplanationPage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Data Analyzed */}
       <section className="container mx-auto px-4 pb-12 md:pb-20">
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="bg-card/60">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <LineChart className="h-5 w-5 text-accent" /> Smart Visuals
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Histograms, time series, scatter, and correlations generated automatically from the current dataset and filters.
-            </CardContent>
-          </Card>
-          <Card className="bg-card/60">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-accent" /> AI Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              EDA‑aware prompts produce concise summaries that highlight trends, extremes, and potential impacts.
-            </CardContent>
-          </Card>
-          <Card className="bg-card/60">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UploadCloud className="h-5 w-5 text-accent" /> Bring Your Data
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Paste JSON/CSV or upload a file in the EDA workspace and get instant charts and statistics.
-            </CardContent>
-          </Card>
+        <h2 className="text-3xl font-bold text-center mb-12">Types of Data We Analyze</h2>
+        <div className="grid gap-8 md:grid-cols-3">
+          {dataTypes.map((type, index) => (
+            <Card key={index} className="bg-card/60 text-center">
+              <CardHeader>
+                <div className="mx-auto bg-primary/10 rounded-full p-4 w-max">
+                    {type.icon}
+                </div>
+                <CardTitle className="mt-4">{type.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{type.description}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
-      {/* How it works */}
+      {/* Automated EDA */}
       <section className="container mx-auto px-4 pb-16">
-        <div className="grid gap-8 md:grid-cols-2 items-start">
-          <div>
-            <h2 className="text-2xl font-bold">How it works</h2>
-            <ol className="mt-4 list-decimal pl-6 space-y-2 text-sm text-muted-foreground">
-              <li>Select an event type and date range on the dashboard.</li>
-              <li>Automatic EDA runs on the fetched data and search filters.</li>
-              <li>Use AI to summarize key findings, or export charts for sharing.</li>
-              <li>Open <code>/eda</code> to analyze your own JSON/CSV datasets.</li>
-            </ol>
-          </div>
-          <div className="rounded-lg border border-border bg-card/50 p-4">
-            <h3 className="text-lg font-semibold mb-2">Data Source</h3>
-            <p className="text-sm text-muted-foreground">
-              Data is sourced from NASA's DONKI API (<a href="https://api.nasa.gov" className="underline">api.nasa.gov</a>). Set
-              your API key via the environment variable <code>NASA_API_KEY</code>.
-            </p>
-          </div>
+        <div className="text-center">
+            <h2 className="text-3xl font-bold">How Our Automated EDA Works</h2>
+            <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">Our custom-built Exploratory Data Analysis (EDA) engine processes your selected data in real-time, providing immediate visualizations and statistical summaries.</p>
+        </div>
+        <div className="grid gap-8 md:grid-cols-3 mt-12">
+          <Card className="bg-card/60">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LineChart className="h-5 w-5 text-accent" /> Smart Visualizations
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Our platform automatically generates histograms, time series plots, scatter charts, and correlation matrices based on your dataset and filters.
+            </CardContent>
+          </Card>
+          <Card className="bg-card/60">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-accent" /> AI-Powered Insights
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Our EDA-aware AI delivers concise summaries that highlight key trends, identify outliers, and assess potential impacts.
+            </CardContent>
+          </Card>
+          <Card className="bg-card/60">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UploadCloud className="h-5 w-5 text-accent" /> Bring Your Own Data
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              You can paste JSON or CSV data—or upload a file—into the EDA workspace to receive instant charts and statistical analyses.
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>

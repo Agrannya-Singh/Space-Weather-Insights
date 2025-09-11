@@ -2,6 +2,30 @@ import { Dashboard } from "@/components/app/dashboard";
 import { EdaLinkButton } from "@/components/app/eda-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Rocket, BarChart, Zap, BrainCircuit } from 'lucide-react'; 
+
+const features = [
+    {
+        icon: <Rocket className="h-8 w-8 text-primary" />,
+        title: "Explore Space-Weather Events",
+        description: "Track CMEs, solar flares, and geomagnetic storms with our interactive charts and maps.",
+    },
+    {
+        icon: <BarChart className="h-8 w-8 text-primary" />,
+        title: "Instant, Automatic EDA",
+        description: "Our app surfaces patterns, correlations, and anomalies, so you can focus on insights.",
+    },
+    {
+        icon: <Zap className="h-8 w-8 text-primary" />,
+        title: "Powered by Next.js & TypeScript",
+        description: "A modern UI with a custom EDA engine that reacts to your filters and searches.",
+    },
+    {
+        icon: <BrainCircuit className="h-8 w-8 text-primary" />,
+        title: "AI-Powered Summaries",
+        description: "Leveraging Genkit (Gemini) for AI summaries with comprehensive EDA context.",
+    },
+];
 
 export default function Home() {
   return (
@@ -59,49 +83,45 @@ export default function Home() {
                 <EdaLinkButton />
             </div>
         </header>
+
         {/* Hero */}
-        <section className="relative overflow-hidden">
+        <section className="relative overflow-hidden py-20 sm:py-32">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_20%_-20%,rgba(99,102,241,0.18),transparent),radial-gradient(900px_450px_at_90%_0%,rgba(34,197,94,0.12),transparent)]" />
-            <div className="container mx-auto px-4 py-10 md:py-16 relative">
-                <div className="max-w-3xl">
-                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">Explore Space Weather with Instant Visual Insights</h2>
-                    <p className="mt-3 text-base md:text-lg text-muted-foreground">A dynamic dashboard for NASA DONKI data with an automatic EDA engine, interactive charts, and AI summaries.</p>
-                    <div className="mt-6 flex flex-wrap gap-3">
-                        <Button asChild><a href="/eda">Try EDA Workspace</a></Button>
-                        <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/80" asChild><a href="/explanation">Learn More</a></Button>
+            <div className="container mx-auto px-4 relative">
+                <div className="max-w-3xl text-center mx-auto">
+                    <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">Unveiling the Mysteries of Space Weather</h2>
+                    <p className="mt-4 text-lg md:text-xl text-muted-foreground">A dynamic dashboard for NASA DONKI data, featuring an automatic EDA engine, interactive charts, and AI-powered summaries.</p>
+                    <div className="mt-8 flex flex-wrap gap-4 justify-center">
+                        <Button asChild size="lg"><a href="/eda">Explore the Workspace</a></Button>
+                        <Button asChild variant="outline" size="lg"><a href="/explanation">Learn More</a></Button>
                     </div>
                 </div>
             </div>
         </section>
-        {/* What/Why/How */}
-        <section className="container mx-auto px-4 pb-10 grid gap-6 md:grid-cols-3">
-            <Card>
-                <CardHeader>
-                    <CardTitle>What</CardTitle>
-                    <CardDescription>A modern web app to explore space‑weather events from NASA DONKI with instant, automatic EDA and AI summaries.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                    Track CMEs, solar flares, geomagnetic storms, and more with interactive charts and maps.
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Why</CardTitle>
-                    <CardDescription>Make raw space‑weather data understandable for enthusiasts, researchers, and builders.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                    The app surfaces patterns, correlations, and anomalies automatically so you can focus on insights.
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>How</CardTitle>
-                    <CardDescription>Next.js + TypeScript UI with a custom EDA engine that reacts to your filters and searches.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                    EDA computes type inference, missingness, numeric stats, outliers, time series, scatter, and correlation.
-                </CardContent>
-            </Card>
+
+        {/* Features */}
+        <section className="py-20 sm:py-32">
+            <div className="container mx-auto px-4">
+                <div className="max-w-3xl text-center mx-auto">
+                    <h3 className="text-3xl md:text-4xl font-extrabold">Everything You Need to Get Started</h3>
+                    <p className="mt-4 text-lg text-muted-foreground">Our platform is designed to make complex space weather data accessible and understandable.</p>
+                </div>
+                <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    {features.map((feature, index) => (
+                        <Card key={index} className="text-center">
+                            <CardHeader>
+                                <div className="mx-auto bg-primary/10 rounded-full p-3 w-max">
+                                    {feature.icon}
+                                </div>
+                                <CardTitle className="mt-4">{feature.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground">{feature.description}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
         </section>
 
         {/* Tech Stack & API Key */}
