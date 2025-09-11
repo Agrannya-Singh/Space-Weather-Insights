@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { DateRange } from "react-day-picker";
-import { subDays, format, parseISO } from "date-fns";
+// Local date helpers to avoid external type issues
+type DateRange = { from?: Date; to?: Date };
+const subDays = (date: Date, days: number): Date => new Date(date.getTime() - days * 24 * 60 * 60 * 1000);
+const formatDate = (d: Date): string => d.toISOString().slice(0, 10);
+const parseISO = (s: string): Date => new Date(s);
 import { DonkiEvent, EventType } from "@/lib/types";
 import { getSpaceWeatherData } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
@@ -45,8 +48,8 @@ export function Dashboard() {
     try {
       const data = await getSpaceWeatherData({
         eventType,
-        startDate: format(date.from, "yyyy-MM-dd"),
-        endDate: format(date.to, "yyyy-MM-dd"),
+        startDate: formatDate(date.from),
+        endDate: formatDate(date.to),
         ...(eventType === "IPS" && { location: ipsLocation, catalog: ipsCatalog }),
       });
 
@@ -82,9 +85,9 @@ export function Dashboard() {
   const handleDateChange = (field: 'from' | 'to', value: string) => {
     const newDate = value ? parseISO(value) : undefined;
     if (field === 'from') {
-        setDate(prev => ({ from: newDate, to: prev?.to }));
+        setDate((prev: DateRange | undefined) => ({ from: newDate, to: prev?.to }));
     } else {
-        setDate(prev => ({ from: prev?.from, to: newDate }));
+        setDate((prev: DateRange | undefined) => ({ from: prev?.from, to: newDate }));
     }
   };
 
