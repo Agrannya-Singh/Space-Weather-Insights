@@ -111,7 +111,7 @@ export function Dashboard() {
 
         <div className="lg:col-span-9 space-y-8">
             <div className="grid grid-cols-1 gap-8">
-                 <Card className="bg-card/50 border border-border/60 shadow-[0_0_0_1px_hsl(var(--border)/0.6),0_8px_24px_-8px_rgba(0,0,0,0.5)]">
+                 <Card className="elevated-card interactive card-hover">
                     <CardHeader>
                         <CardTitle>Data Visualization</CardTitle>
                         <CardDescription>Visual representation of the selected event data.</CardDescription>

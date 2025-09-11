@@ -4,7 +4,7 @@ import { EdaLinkButton } from "@/components/app/eda-link";
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/70 backdrop-blur-xl">
+        <header className="sticky top-0 z-10 glass-header interactive">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 <h1 className="text-2xl font-bold font-headline flex items-center gap-2">
                     <div

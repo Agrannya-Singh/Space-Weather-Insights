@@ -82,3 +82,27 @@ body {
     background-image: radial-gradient(1200px 600px at 10% -10%, hsl(var(--accent)/0.08), transparent), radial-gradient(800px 400px at 90% 0%, hsl(var(--chart-2)/0.08), transparent);
   }
 }
+
+@layer utilities {
+  .glass-header {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background-color: hsl(var(--background) / 0.7);
+    border-bottom: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  .elevated-card {
+    border: 1px solid hsl(var(--border) / 0.6);
+    box-shadow: 0 0 0 1px hsl(var(--border) / 0.6), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+    border-radius: var(--radius);
+    background-color: hsl(var(--card) / 0.5);
+  }
+
+  .interactive {
+    transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease, background-color 150ms ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(1px);
+  }
+}
