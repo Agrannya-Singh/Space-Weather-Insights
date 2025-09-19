@@ -57,7 +57,7 @@
     "@opentelemetry/exporter-jaeger": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "genkit-cli": "^1.13.0",
