@@ -96,7 +96,6 @@ This repo includes a `Jenkinsfile` that runs:
 
 Set up Jenkins credentials for your registry and configure environment variables as needed.
 
-Of course. Here is a resume summary for the project, following the guidelines you provided.
 
 ***
 
