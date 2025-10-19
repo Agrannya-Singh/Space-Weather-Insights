@@ -107,3 +107,13 @@ Set up Jenkins credentials for your registry and configure environment variables
 *   Developed a custom Exploratory Data Analysis (EDA) engine in TypeScript that automates the generation of 5+ types of interactive visualizations (e.g., histograms, time-series charts), reducing manual data analysis time by an estimated 95%.
 *   Integrated Google's Gemini AI via Genkit to generate contextual, EDA-aware summaries of complex datasets, making critical space weather information accessible to a broader audience of enthusiasts and researchers.
 *   Revamped the UI/UX to create a modern, user-centric design, resulting in a more intuitive and engaging experience for navigating complex scientific data and improving overall usability.
+
+## Optional: MongoDB caching
+
+This project supports an optional MongoDB-backed cache to reduce calls to the NASA DONKI API.
+
+- Set `MONGODB_URI` to enable the cache (e.g., `mongodb+srv://user:pass@cluster.example.com`).
+- Optional environment variables: `MONGODB_DB` (defaults to `space_weather_cache`) and `MONGODB_COLLECTION` (defaults to `api_cache`).
+- Cached entries are stored per endpoint+query and the code writes them with a 12 hour TTL by default.
+
+If `MONGODB_URI` is not provided the application will continue to fetch directly from NASA.

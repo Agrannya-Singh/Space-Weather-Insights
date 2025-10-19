@@ -1,12 +1,13 @@
-'use server';
+ 'use server';
 
 import { z } from 'zod';
 import { EventType } from './types';
+import { getCache, setCache } from './mongoCache';
 
 const API_KEY = process.env.NASA_API_KEY || 'R8ZoVAsKe3MhKM0vdsrOg5ppoy8xHSlbPHM4UI1A';
 const BASE_URL = 'https://api.nasa.gov/DONKI';
 
-// Centralized mapping to avoid redundant conditional endpoint handling
+// Endpoint mapping
 const EVENT_TYPE_TO_ENDPOINT: Record<string, string> = {
   // Direct mappings (endpoint name is identical)
   GST: 'GST',
@@ -45,7 +46,19 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
       if (location && location !== 'ALL') url.searchParams.append('location', location);
       if (catalog && catalog !== 'ALL') url.searchParams.append('catalog', catalog);
     }
-    
+    const cacheKey = `donki:${endpoint}:${url.searchParams.toString()}`;
+
+    // check cache
+    try {
+      const cached = await getCache(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    } catch (e) {
+      // on cache error, continue
+      console.warn('Cache read failed:', e);
+    }
+
     const response = await fetch(url.toString());
 
     if (!response.ok) {
@@ -55,6 +68,13 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
     }
 
     const data = await response.json();
+
+    // store in cache (uses configured TTL)
+    try {
+      await setCache(cacheKey, data);
+    } catch (e) {
+      console.warn('Cache write failed:', e);
+    }
     return data;
   } catch (error) {
     console.error('Error fetching space weather data:', error);

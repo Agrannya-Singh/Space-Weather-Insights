@@ -2,14 +2,14 @@ version: '3.8'
 
 services:
   space-weather-insights:
-    build: . # Tells Compose to build the image from the Dockerfile in the current directory
-    container_name: space-weather-insights-app # Optional: Define a specific name for the container
+    build: .
+    container_name: space-weather-insights-app
     ports:
-      - "3000:3000" # Maps port 3000 on the host to port 3000 in the container
-      # Use "9002:3000" if you prefer to access it via localhost:9002 as mentioned for dev in the README
+      - "3000:3000"
     environment:
-      NODE_ENV: production # Sets the Node environment to production
-      # NASA_API_KEY: ${NASA_API_KEY} 
+      NODE_ENV: "${NODE_ENV:-production}"
+      # NASA_API_KEY: "${NASA_API_KEY}"
+      # MONGODB_URI: "${MONGODB_URI}"
     env_file:
-      - .env # Loads environment variables 
-    restart: unless-stopped # Configures the restart policy
+      - .env
+    restart: unless-stopped

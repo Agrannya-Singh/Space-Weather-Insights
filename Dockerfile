@@ -36,4 +36,6 @@ USER nextjs
 
 EXPOSE 3000
 
+# Runtime env vars: NODE_ENV, NASA_API_KEY, MONGODB_URI
+# For docker-compose: copy .env.sample -> .env
 CMD ["npm", "start"]
