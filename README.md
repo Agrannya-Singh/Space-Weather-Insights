@@ -5,6 +5,8 @@
 This project provides a visually appealing and informative dashboard to track solar activity events using data from NASA's Space Weather Database of Notifications, Knowledge, and Information (DONKI). Built with the power of Next.js and Firebase, this application offers a seamless and engaging experience for exploring the dynamic nature of our sun. a custom EDA engine in TypeScript that automates the generation of 5+ chart types, reducing manual
 analysis time by an estimated 80%
 
+deployment via docker : https://space-weather-insights.onrender.com
+
 ### ✨ Key Features:
 
 *   **Real-time Data:** Stay updated with the latest solar events directly from the NASA DONKI database.
