@@ -200,11 +200,29 @@ export function analyzeDataset(rows: any[]): EdaResult {
     fields.push(summary);
   }
 
-  // Correlation (sampled) for numeric fields
+  // Correlation (sampled) for numeric fields, excluding likely ID fields
   const numericFields = fields.filter(f => f.numeric && Number.isFinite(f.numeric.min) && Number.isFinite(f.numeric.max));
-  if (numericFields.length >= 2 && rowCount > 0) {
-    const cols = numericFields.map(f => rows.map(r => tryParseNumber(r?.[f.field]) ?? NaN).filter(n => Number.isFinite(n)));
-    const m = numericFields.length;
+  const commonIdPatterns = /id$|num$|number$|index$|version$|code$/i;
+  const MAX_CARDINALITY_RATIO_FOR_CORRELATION = 0.5;
+  const ABSOLUTE_CARDINALITY_THRESHOLD = 1000;
+
+  const fieldsForCorrelation = numericFields.filter(f => {
+    // Filter 1: Name check
+    if (commonIdPatterns.test(f.field)) {
+      return false;
+    }
+    // Filter 2: Cardinality check for integers
+    if (f.type === 'integer') {
+      const cardinality = f.cardinality ?? 0;
+      const ratio = rowCount > 0 ? cardinality / rowCount : 1;
+      return ratio <= MAX_CARDINALITY_RATIO_FOR_CORRELATION && cardinality <= ABSOLUTE_CARDINALITY_THRESHOLD;
+    }
+    return true; // Keep non-integer numeric fields
+  });
+
+  if (fieldsForCorrelation.length >= 2 && rowCount > 0) {
+    const cols = fieldsForCorrelation.map(f => rows.map(r => tryParseNumber(r?.[f.field]) ?? NaN).filter(n => Number.isFinite(n)));
+    const m = fieldsForCorrelation.length;
     const matrix: number[][] = Array.from({ length: m }, () => Array(m).fill(1));
     for (let i = 0; i < m; i++) {
       for (let j = i + 1; j < m; j++) {
@@ -215,7 +233,7 @@ export function analyzeDataset(rows: any[]): EdaResult {
         matrix[i][j] = matrix[j][i] = corr;
       }
     }
-    return { rowCount, fields, detectedTimeField, correlation: { fields: numericFields.map(f => f.field), matrix, sampled: rowCount } };
+    return { rowCount, fields, detectedTimeField, correlation: { fields: fieldsForCorrelation.map(f => f.field), matrix, sampled: rowCount } };
   }
 
   return { rowCount, fields, detectedTimeField };
