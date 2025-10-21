@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1.4
 
 # ---- Base ----
-# Use a specific Node.js Alpine version and update tools
-FROM node:20-alpine AS base
+# Use a Debian-based slim image
+FROM node:20-slim AS base
 WORKDIR /app
 ENV NODE_ENV=production
-# Update apk and npm to potentially newer versions within the image
-RUN apk update && apk upgrade && npm install -g npm@latest
+# Update npm if desired (optional, but good practice)
+RUN npm install -g npm@latest
 
 # ---- Dependencies ----
 # Install ONLY production dependencies using --omit=dev
@@ -35,9 +35,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Create a non-root user for security
+# Create a non-root user for security (adjust commands for Debian)
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN adduser --system --uid 1001 --gid 1001 nextjs
 
 # Copy necessary files from previous stages
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
@@ -49,9 +49,9 @@ USER nextjs
 
 EXPOSE 3000
 
-# Basic healthcheck to see if the server starts
+# Basic healthcheck using curl (wget might not be present in slim)
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+  CMD curl --fail http://localhost:3000 || exit 1
 
 # Start the application using the standard Next.js start command
 CMD ["npm", "start"]
