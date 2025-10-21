@@ -1,41 +1,56 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.4
 
-# 1) Build stage
-FROM node:20-alpine AS builder
+# ---- Base ----
+# Use a specific Node.js version on Alpine for smaller images
+FROM node:20-alpine AS base
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Install deps separately for better caching
+
+# ---- Dependencies ----
+# Install ONLY production dependencies in a separate stage for caching
+FROM base AS deps
+COPY package.json package-lock.json ./
+RUN npm ci --only=production --no-audit --no-fund
+
+
+# ---- Builder ----
+# Install ALL dependencies (including dev) and build the application
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
-
-# Copy source
 COPY . .
-
-# Build Next.js
-ENV NODE_ENV=production
+# Disable telemetry during build
+ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
-# 2) Runtime stage
-FROM node:20-alpine AS runner
+
+# ---- Runner ----
+# Final stage with application code, production dependencies, and built assets
+FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Create non-root user
-RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
+# Create a non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Copy only necessary artifacts
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/package-lock.json ./package-lock.json
-COPY --from=builder /app/.next ./.next
+# Copy necessary files from previous stages
+# Copy production node_modules first
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY package.json ./
+
+# Copy built application files
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/public ./public
-
-# Install production deps only
-RUN npm ci --only=production --no-audit --no-fund
 
 USER nextjs
 
 EXPOSE 3000
+ENV PORT 3000
 
-# Runtime env vars: NODE_ENV, NASA_API_KEY, MONGODB_URI
-# For docker-compose: copy .env.sample -> .env
+# Start the application using the standard Next.js start command
 CMD ["npm", "start"]
