@@ -1,31 +1,28 @@
 # syntax=docker/dockerfile:1.4
 
 # ---- Base ----
-# Use a specific Node.js version on Alpine for smaller images
 FROM node:20-alpine AS base
 WORKDIR /app
 ENV NODE_ENV=production
 
-
 # ---- Dependencies ----
-# Install ONLY production dependencies in a separate stage for caching
+# Install ONLY production dependencies first to leverage cache if possible
+# Although this layer might not be used directly by the final image if
+# build dependencies affect the final node_modules structure significantly.
 FROM base AS deps
 COPY package.json package-lock.json ./
 RUN npm ci --only=production --no-audit --no-fund
 
-
 # ---- Builder ----
-# Install ALL dependencies (including dev) and build the application
+# Install ALL dependencies (including dev) AFTER copying source code
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
-COPY . .
+COPY . .  # Copy source code including tsconfig.json etc. FIRST
+RUN npm ci --no-audit --no-fund # Install ALL dependencies based on lock file
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
-
 
 # ---- Runner ----
 # Final stage with application code, production dependencies, and built assets
@@ -39,11 +36,11 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files from previous stages
-# Copy production node_modules first
+# Copy production node_modules from the dedicated 'deps' stage
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY package.json ./
 
-# Copy built application files
+# Copy built application files from the 'builder' stage
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/public ./public
 
