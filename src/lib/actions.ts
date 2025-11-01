@@ -37,23 +37,22 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
       }
     }
 
-    const collectionRef = db.collection(eventType);
-    let query: FirebaseFirestore.Query = collectionRef;
+    let collectionRef: FirebaseFirestore.CollectionReference | FirebaseFirestore.Query = db.collection(eventType);
 
     if (startDate) {
-      query = query.where('startTime', '>=', startDate);
+        collectionRef = collectionRef.where('startTime', '>=', startDate);
     }
     if (endDate) {
-      query = query.where('startTime', '<=', endDate);
+        collectionRef = collectionRef.where('startTime', '<=', endDate);
     }
     if (eventType === 'IPS' && location) {
-        query = query.where('location', '==', location);
+        collectionRef = collectionRef.where('location', '==', location);
     }
     if (eventType === 'IPS' && catalog) {
-        query = query.where('catalog', '==', catalog);
+        collectionRef = collectionRef.where('catalog', '==', catalog);
     }
 
-    const snapshot = await query.get();
+    const snapshot = await collectionRef.get();
     const data = snapshot.docs.map(doc => doc.data());
 
     await cacheRef.set({
