@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { ChartConfig } from "@/components/ui/chart";
 import { analyzeDataset, basicCsvParse, EdaResult } from "@/lib/eda";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -116,6 +117,13 @@ export default function EdaPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+  
+  const timeSeriesChartConfig = {
+    count: {
+      label: "Count",
+      color: "#f59e0b",
+    },
+  } satisfies ChartConfig;
 
   return (
     <div className="container mx-auto p-4 md:p-8 space-y-6">
@@ -220,7 +228,14 @@ export default function EdaPage() {
           </TabsContent>
 
           <TabsContent value="numeric" className="space-y-4">
-            {result.fields.filter((f) => f.numeric).map((f) => (
+            {result.fields.filter((f) => f.numeric).map((f) => {
+              const chartConfig = {
+                count: {
+                  label: "Count",
+                  color: "#0ea5e9",
+                },
+              } satisfies ChartConfig;
+              return (
               <Card key={f.field}>
                 <CardHeader>
                   <CardTitle>{f.field}</CardTitle>
@@ -236,40 +251,47 @@ export default function EdaPage() {
                     <Stat label="StdDev" value={f.numeric?.stddev} />
                   </div>
                   {histogramData[f.field] && (
-                    <ChartContainer config={{}} className="h-[240px] w-full">
+                    <ChartContainer config={chartConfig} className="h-[240px] w-full">
                       <BarChart data={histogramData[f.field].bins}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                         <YAxis />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="count" fill="#0ea5e9" />
+                        <ChartTooltip content={<ChartTooltipContent config={chartConfig} />} />
+                        <Bar dataKey="count" fill="var(--color-count)" />
                       </BarChart>
                     </ChartContainer>
                   )}
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </TabsContent>
 
           <TabsContent value="categorical" className="space-y-4">
-            {topCategoricals.map((cat) => (
+            {topCategoricals.map((cat) => {
+               const chartConfig = {
+                count: {
+                  label: cat.field,
+                  color: "#34d399",
+                },
+              } satisfies ChartConfig;
+              return (
               <Card key={cat.field}>
                 <CardHeader>
                   <CardTitle>{cat.field}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={{}} className="h-[240px] w-full">
+                  <ChartContainer config={chartConfig} className="h-[240px] w-full">
                     <BarChart data={cat.values}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="value" tick={{ fontSize: 12 }} hide={false} interval={0} angle={-15} height={50} />
                       <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="count" fill="#34d399" />
+                      <ChartTooltip content={<ChartTooltipContent config={chartConfig} />} />
+                      <Bar dataKey="count" fill="var(--color-count)" />
                     </BarChart>
                   </ChartContainer>
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </TabsContent>
 
           <TabsContent value="time" className="space-y-4">
@@ -279,13 +301,13 @@ export default function EdaPage() {
                   <CardTitle>{result?.detectedTimeField} Count Over Time</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={{}} className="h-[240px] w-full">
+                  <ChartContainer config={timeSeriesChartConfig} className="h-[240px] w-full">
                     <LineChart data={timeSeriesCandidates}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="time" />
                       <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                      <ChartTooltip content={<ChartTooltipContent config={timeSeriesChartConfig} />} />
+                      <Line type="monotone" dataKey="count" stroke="var(--color-count)" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ChartContainer>
                 </CardContent>

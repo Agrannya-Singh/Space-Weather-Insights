@@ -111,6 +111,7 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed"
       nameKey?: string
       labelKey?: string
+      config?: ChartConfig
     }
 >(
   (
@@ -128,13 +129,15 @@ const ChartTooltipContent = React.forwardRef<
       color,
       nameKey,
       labelKey,
+      config: configProp,
     },
     ref
   ) => {
-    const { config } = useChart()
+    const chartContext = React.useContext(ChartContext)
+    const config = configProp || chartContext?.config
 
     const tooltipLabel = React.useMemo(() => {
-      if (hideLabel || !payload?.length) {
+      if (hideLabel || !payload?.length || !config) {
         return null
       }
 
@@ -169,7 +172,7 @@ const ChartTooltipContent = React.forwardRef<
       labelKey,
     ])
 
-    if (!active || !payload?.length) {
+    if (!active || !payload?.length || !config) {
       return null
     }
 
