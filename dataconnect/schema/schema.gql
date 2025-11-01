@@ -1,0 +1,24 @@
+type User @table {
+  authId: String!
+  displayName: String
+  email: String
+}
+
+type CME @table {
+  cmeId: String!
+  startTime: Timestamp!
+  speed: Int!
+  latitude: Float!
+  longitude: Float!
+  halfAngle: Float!
+  type: String!
+  note: String
+  catalog: String
+}
+
+type CachedData @table {
+  endpoint: String!
+  timestamp: Timestamp!
+  data: String!
+  ttl: Int
+}

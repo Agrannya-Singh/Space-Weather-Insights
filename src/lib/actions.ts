@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { EventType } from './types';
 import { db } from './firebase';
+import { createHash } from 'crypto';
 
 const actionSchema = z.object({
   eventType: z.custom<EventType>(),
@@ -12,10 +13,29 @@ const actionSchema = z.object({
   catalog: z.string().optional(),
 });
 
+const generateCacheKey = (params: any) => {
+  const hash = createHash('sha256');
+  hash.update(JSON.stringify(params));
+  return hash.digest('hex');
+};
+
 export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) {
   try {
     const validatedParams = actionSchema.parse(params);
     const { eventType, startDate, endDate, location, catalog } = validatedParams;
+
+    const cacheKey = generateCacheKey(validatedParams);
+    const cacheRef = db.collection('cache').doc(cacheKey);
+
+    const cacheDoc = await cacheRef.get();
+    if (cacheDoc.exists) {
+      const { data, timestamp } = cacheDoc.data() as { data: any[], timestamp: number };
+      // Cache expires after 1 hour
+      if (Date.now() - timestamp < 3600000) {
+        console.log('Data retrieved from cache');
+        return data;
+      }
+    }
 
     const collectionRef = db.collection(eventType);
     let query: FirebaseFirestore.Query = collectionRef;
@@ -35,6 +55,12 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
 
     const snapshot = await query.get();
     const data = snapshot.docs.map(doc => doc.data());
+
+    await cacheRef.set({
+      data,
+      timestamp: Date.now(),
+    });
+    console.log('Data written to cache');
 
     return data;
   } catch (error) {
