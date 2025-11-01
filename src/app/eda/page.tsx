@@ -85,7 +85,7 @@ export default function EdaPage() {
   const topCategoricals = useMemo(() => {
     if (!result) return [] as { field: string; values: { value: string; count: number }[] }[];
     return result.fields
-      .filter((f) => f.categorical && (f.type === 'string' || f.type === 'boolean' || f.type === 'integer'))
+      .filter((f) => f.categorical && (f.type === 'string' || f.type === 'boolean' || f.type === 'integer' || f.type === 'object'))
       .slice(0, 6)
       .map((f) => ({ field: f.field, values: (f.categorical ?? []).slice(0, 12) }));
   }, [result]);
@@ -121,7 +121,7 @@ export default function EdaPage() {
   const timeSeriesChartConfig = {
     count: {
       label: "Count",
-      color: "#f59e0b",
+      color: "hsl(var(--chart-2))",
     },
   } satisfies ChartConfig;
 
@@ -232,7 +232,7 @@ export default function EdaPage() {
               const chartConfig = {
                 count: {
                   label: "Count",
-                  color: "#0ea5e9",
+                  color: "hsl(var(--chart-1))",
                 },
               } satisfies ChartConfig;
               return (
@@ -268,30 +268,56 @@ export default function EdaPage() {
 
           <TabsContent value="categorical" className="space-y-4">
             {topCategoricals.map((cat) => {
-               const chartConfig = {
+              const chartConfig = {
                 count: {
-                  label: cat.field,
-                  color: "#34d399",
+                  label: "Count",
+                  color: "hsl(var(--chart-3))",
                 },
               } satisfies ChartConfig;
               return (
-              <Card key={cat.field}>
-                <CardHeader>
-                  <CardTitle>{cat.field}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[240px] w-full">
-                    <BarChart data={cat.values}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="value" tick={{ fontSize: 12 }} hide={false} interval={0} angle={-15} height={50} />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent config={chartConfig} />} />
-                      <Bar dataKey="count" fill="var(--color-count)" />
-                    </BarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            )})}
+                <Card key={cat.field}>
+                  <CardHeader>
+                    <CardTitle>Distribution: {cat.field}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer
+                      config={chartConfig}
+                      className="h-[400px] w-full"
+                    >
+                      <BarChart
+                        data={cat.values}
+                        layout="vertical"
+                        margin={{ right: 20, left: 20 }}
+                      >
+                        <CartesianGrid horizontal={false} />
+                        <XAxis type="number" dataKey="count" />
+                        <YAxis
+                          dataKey="value"
+                          type="category"
+                          width={150}
+                          interval={0}
+                          tickFormatter={(value) => {
+                            if (typeof value === "object" && value !== null) {
+                              return JSON.stringify(value);
+                            }
+                            return String(value);
+                          }}
+                        />
+                        <ChartTooltip
+                          cursor={{ fill: "hsl(var(--muted))" }}
+                          content={<ChartTooltipContent config={chartConfig} />}
+                        />
+                        <Bar
+                          dataKey="count"
+                          fill="var(--color-count)"
+                          radius={4}
+                        />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </TabsContent>
 
           <TabsContent value="time" className="space-y-4">
