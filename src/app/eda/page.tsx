@@ -84,7 +84,7 @@ export default function EdaPage() {
   const topCategoricals = useMemo(() => {
     if (!result) return [] as { field: string; values: { value: string; count: number }[] }[];
     return result.fields
-      .filter((f) => f.categorical && (f.type === 'string' || f.type === 'boolean' || f.type === 'integer'))
+      .filter((f) => f.categorical && (f.type === \'string\' || f.type === \'boolean\' || f.type === \'integer\'))
       .slice(0, 6)
       .map((f) => ({ field: f.field, values: (f.categorical ?? []).slice(0, 12) }));
   }, [result]);
@@ -108,11 +108,11 @@ export default function EdaPage() {
 
   const handleDownloadJson = () => {
     if (!result) return;
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: \'application/json\' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement(\'a\');
     a.href = url;
-    a.download = 'eda_result.json';
+    a.download = \'eda_result.json\';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -136,7 +136,7 @@ export default function EdaPage() {
               <option value="json">JSON</option>
               <option value="csv">CSV</option>
             </select>
-            <Input type="file" accept={format === 'json' ? '.json,.txt' : '.csv,.txt'} onChange={(e) => handleFile(e.target.files?.[0])} />
+            <Input type="file" accept={format === \'json\' ? \'.json,.txt\' : \'.csv,.txt\'} onChange={(e) => handleFile(e.target.files?.[0])} />
             <Button onClick={handleAnalyze} disabled={!rawText || loading}>
               Analyze
             </Button>
@@ -144,7 +144,7 @@ export default function EdaPage() {
           <Textarea
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
-            placeholder={format === 'json' ? 'Paste JSON array here' : 'Paste CSV text here'}
+            placeholder={format === \'json\' ? \'Paste JSON array here\' : \'Paste CSV text here\'}
             className="min-h-[160px]"
           />
         </CardContent>
@@ -180,7 +180,7 @@ export default function EdaPage() {
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Time Field</div>
-                    <div className="text-xl font-semibold">{result.detectedTimeField ?? '—'}</div>
+                    <div className="text-xl font-semibold">{result.detectedTimeField ?? \'—\'}</div>
                   </div>
                 </div>
               </CardContent>
@@ -208,8 +208,8 @@ export default function EdaPage() {
                           <td className="p-2 font-medium">{f.field}</td>
                           <td className="p-2">{f.type}</td>
                           <td className="p-2">{f.missingCount} ({f.missingPercent.toFixed(1)}%)</td>
-                          <td className="p-2">{f.cardinality ?? '—'}</td>
-                          <td className="p-2 whitespace-nowrap truncate max-w-[360px]">{f.sampleValues.map((v) => JSON.stringify(v)).join(', ')}</td>
+                          <td className="p-2">{f.cardinality ?? \'—\'}</td>
+                          <td className="p-2 whitespace-nowrap truncate max-w-[360px]">{f.sampleValues.map((v) => JSON.stringify(v)).join(\', \')}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -241,114 +241,112 @@ export default function EdaPage() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                         <YAxis />
-                        <ReTooltip content={<ChartTooltipContent />} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
                         <Bar dataKey="count" fill="#0ea5e9" />
                       </BarChart>
                     </ChartContainer>
                   )}
                 </CardContent>
               </Card>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="categorical" className="space-y-4">
-            {topCategoricals.map((cat) => (
-              <Card key={cat.field}>
-                <CardHeader>
-                  <CardTitle>{cat.field}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={{}} className="h-[240px] w-full">
-                    <BarChart data={cat.values}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="value" tick={{ fontSize: 12 }} hide={false} interval={0} angle={-15} height={50} />
-                      <YAxis />
-                      <ReTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="count" fill="#34d399" />
-                    </BarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="time" className="space-y-4">
-            {timeSeriesCandidates.length > 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{result?.detectedTimeField} Count Over Time</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={{}} className="h-[240px] w-full">
-                    <LineChart data={timeSeriesCandidates}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="time" />
-                      <YAxis />
-                      <ReTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                    </LineChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="text-sm text-muted-foreground">No time field detected.</div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="correlation" className="space-y-4">
-            {result.correlation && result.correlation.fields.length >= 2 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Correlation Heatmap (sampled {result.correlation.sampled} rows)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-auto">
-                    <table className="text-xs">
-                      <thead>
-                        <tr>
-                          <th className="p-1" />
-                          {result.correlation.fields.map((f) => (
-                            <th key={f} className="p-1 text-left whitespace-nowrap">{f}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.correlation.matrix.map((row, i) => (
-                          <tr key={i}>
-                            <td className="p-1 pr-2 font-medium whitespace-nowrap">{result.correlation!.fields[i]}</td>
-                            {row.map((val, j) => {
-                              const v = isFinite(val) ? val : 0;
-                              const color = v >= 0 ? `rgba(16, 185, 129, ${Math.abs(v)})` : `rgba(244, 63, 94, ${Math.abs(v)})`;
-                              return (
-                                <td key={j} className="p-1 text-center" style={{ backgroundColor: color }}>
-                                  {isFinite(val) ? v.toFixed(2) : '—'}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="text-sm text-muted-foreground">Not enough numeric fields for correlation.</div>
-            )}
-          </TabsContent>
-        </Tabs>
-      )}
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number | undefined }) {
-  return (
-    <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="font-medium">{value !== undefined && isFinite(value) ? Number(value).toFixed(2) : '—'}</div>
-    </div>
-  );
-}
-
-
+            ))}\
+          </TabsContent>\
+\
+          <TabsContent value="categorical" className="space-y-4">\
+            {topCategoricals.map((cat) => (\
+              <Card key={cat.field}>\
+                <CardHeader>\
+                  <CardTitle>{cat.field}</CardTitle>\
+                </CardHeader>\
+                <CardContent>\
+                  <ChartContainer config={{}} className="h-[240px] w-full">\
+                    <BarChart data={cat.values}>\
+                      <CartesianGrid strokeDasharray="3 3" />\
+                      <XAxis dataKey="value" tick={{ fontSize: 12 }} hide={false} interval={0} angle={-15} height={50} />\
+                      <YAxis />\
+                      <ChartTooltip content={<ChartTooltipContent />} />\
+                      <Bar dataKey="count" fill="#34d399" />\
+                    </BarChart>\
+                  </ChartContainer>\
+                </CardContent>\
+              </Card>\
+            ))}\
+          </TabsContent>\
+\
+          <TabsContent value="time" className="space-y-4">\
+            {timeSeriesCandidates.length > 0 ? (\
+              <Card>\
+                <CardHeader>\
+                  <CardTitle>{result?.detectedTimeField} Count Over Time</CardTitle>\
+                </CardHeader>\
+                <CardContent>\
+                  <ChartContainer config={{}} className="h-[240px] w-full">\
+                    <LineChart data={timeSeriesCandidates}>\
+                      <CartesianGrid strokeDasharray="3 3" />\
+                      <XAxis dataKey="time" />\
+                      <YAxis />\
+                      <ChartTooltip content={<ChartTooltipContent />} />\
+                      <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} dot={false} />\
+                    </LineChart>\
+                  </ChartContainer>\
+                </CardContent>\
+              </Card>\
+            ) : (\
+              <div className="text-sm text-muted-foreground">No time field detected.</div>\
+            )}\
+          </TabsContent>\
+\
+          <TabsContent value="correlation" className="space-y-4">\
+            {result.correlation && result.correlation.fields.length >= 2 ? (\
+              <Card>\
+                <CardHeader>\
+                  <CardTitle>Correlation Heatmap (sampled {result.correlation.sampled} rows)</CardTitle>\
+                </CardHeader>\
+                <CardContent>\
+                  <div className="overflow-auto">\
+                    <table className="text-xs">\
+                      <thead>\
+                        <tr>\
+                          <th className="p-1" />\
+                          {result.correlation.fields.map((f) => (\
+                            <th key={f} className="p-1 text-left whitespace-nowrap">{f}</th>\
+                          ))}\
+                        </tr>\
+                      </thead>\
+                      <tbody>\
+                        {result.correlation.matrix.map((row, i) => (\
+                          <tr key={i}>\
+                            <td className="p-1 pr-2 font-medium whitespace-nowrap">{result.correlation!.fields[i]}</td>\
+                            {row.map((val, j) => {\
+                              const v = isFinite(val) ? val : 0;\
+                              const color = v >= 0 ? `rgba(16, 185, 129, ${Math.abs(v)})` : `rgba(244, 63, 94, ${Math.abs(v)})`;\
+                              return (\
+                                <td key={j} className="p-1 text-center" style={{ backgroundColor: color }}>\
+                                  {isFinite(val) ? v.toFixed(2) : \'—\'}\
+                                </td>\
+                              );\
+                            })}\
+                          </tr>\
+                        ))}\
+                      </tbody>\
+                    </table>\
+                  </div>\
+                </CardContent>\
+              </Card>\
+            ) : (\
+              <div className="text-sm text-muted-foreground">Not enough numeric fields for correlation.</div>\
+            )}\
+          </TabsContent>\
+        </Tabs>\
+      )}\
+    </div>\
+  );\
+}\
+\
+function Stat({ label, value }: { label: string; value: number | undefined }) {\
+  return (\
+    <div>\
+      <div className="text-xs text-muted-foreground">{label}</div>\
+      <div className="font-medium">{value !== undefined && isFinite(value) ? Number(value).toFixed(2) : \'—\'}</div>\
+    </div>\
+  );\
+}\
