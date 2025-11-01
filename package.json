@@ -43,6 +43,7 @@
     "dotenv": "^17.2.2",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.3.0",
+    "firebase-admin": "^13.5.0",
     "genkit": "^1.13.0",
     "lucide-react": "^0.546.0",
     "mongodb": "^5.9.2",
