@@ -2,9 +2,7 @@
 
 import { z } from 'zod';
 import { EventType } from './types';
-
-const API_KEY = process.env.NASA_API_KEY || 'R8ZoVAsKe3MhKM0vdsrOg5ppoy8xHSlbPHM4UI1A';
-const BASE_URL = 'https://api.nasa.gov/DONKI';
+import { db } from './firebase';
 
 const actionSchema = z.object({
   eventType: z.custom<EventType>(),
@@ -19,29 +17,25 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
     const validatedParams = actionSchema.parse(params);
     const { eventType, startDate, endDate, location, catalog } = validatedParams;
 
-    let endpoint: string = eventType;
-    if (eventType === 'WSA') endpoint = 'WSAEnlilSimulations';
-    if (eventType === 'CME') endpoint = 'CME';
-    
-    const url = new URL(`${BASE_URL}/${endpoint}`);
-    url.searchParams.append('api_key', API_KEY);
-    url.searchParams.append('startDate', startDate);
-    url.searchParams.append('endDate', endDate);
+    const collectionRef = db.collection(eventType);
+    let query: FirebaseFirestore.Query = collectionRef;
 
-    if (eventType === 'IPS') {
-      if (location) url.searchParams.append('location', location);
-      if (catalog) url.searchParams.append('catalog', catalog);
+    if (startDate) {
+      query = query.where('startTime', '>=', startDate);
     }
-    
-    const response = await fetch(url.toString());
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API Error for ${eventType}:`, errorText);
-      throw new Error(`Failed to fetch data for ${eventType}. Status: ${response.status}`);
+    if (endDate) {
+      query = query.where('startTime', '<=', endDate);
+    }
+    if (eventType === 'IPS' && location) {
+        query = query.where('location', '==', location);
+    }
+    if (eventType === 'IPS' && catalog) {
+        query = query.where('catalog', '==', catalog);
     }
 
-    const data = await response.json();
+    const snapshot = await query.get();
+    const data = snapshot.docs.map(doc => doc.data());
+
     return data;
   } catch (error) {
     console.error('Error fetching space weather data:', error);
