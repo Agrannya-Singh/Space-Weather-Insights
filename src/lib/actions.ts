@@ -30,8 +30,8 @@ export async function getSpaceWeatherData(params: z.infer<typeof actionSchema>) 
     const cacheDoc = await cacheRef.get();
     if (cacheDoc.exists) {
       const { data, timestamp } = cacheDoc.data() as { data: any[], timestamp: number };
-      // Cache expires after 1 hour
-      if (Date.now() - timestamp < 3600000) {
+      // Cache expires after 20 minutes
+      if (Date.now() - timestamp < 1200000) {
         console.log('Data retrieved from cache');
         return data;
       }
