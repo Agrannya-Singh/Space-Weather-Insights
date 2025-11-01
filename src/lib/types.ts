@@ -6,10 +6,23 @@ export interface KpIndex {
     source: string;
 }
 
+export interface CMEAnalysis {
+    time21_5: string;
+    latitude: number;
+    longitude: number;
+    halfAngle: number;
+    speed: number;
+    type: string;
+    isMostAccurate: boolean;
+    note: string;
+}
+
 export interface DonkiEvent {
   [key: string]: any;
   allKpIndex?: KpIndex[];
   sourceLocation?: string;
+  cmeAnalyses?: CMEAnalysis[];
+  activityID?: string;
 }
 
 export const eventTypes: { value: EventType, label: string }[] = [

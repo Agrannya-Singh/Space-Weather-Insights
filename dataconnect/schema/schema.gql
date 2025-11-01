@@ -4,16 +4,24 @@ type User @table {
   email: String
 }
 
+type CMEAnalysis {
+  time21_5: Timestamp
+  latitude: Float
+  longitude: Float
+  halfAngle: Float
+  speed: Int
+  type: String
+  isMostAccurate: Boolean
+  note: String
+}
+
 type CME @table {
-  cmeId: String!
+  activityID: String!
   startTime: Timestamp!
-  speed: Int!
-  latitude: Float!
-  longitude: Float!
-  halfAngle: Float!
-  type: String!
   note: String
   catalog: String
+  sourceLocation: String
+  cmeAnalyses: [CMEAnalysis]
 }
 
 type CachedData @table {
