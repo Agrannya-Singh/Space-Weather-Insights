@@ -28,7 +28,7 @@ export type GenerateEventSummaryOutput = z.infer<typeof GenerateEventSummaryOutp
 export async function generateEventSummary(input: GenerateEventSummaryInput): Promise<GenerateEventSummaryOutput> {
     const user = auth.currentUser;
     if (!user) {
-        throw new Error('You must be logged in to generate a summary.');
+        throw new Error('Please log in to access AI-powered features. This helps us ensure a high-quality experience for all users.');
     }
 
     const userId = user.uid;
@@ -70,13 +70,7 @@ const prompt = ai.definePrompt({
   name: 'generateEventSummaryPrompt',
   input: {schema: GenerateEventSummaryInputSchema},
   output: {schema: GenerateEventSummaryOutputSchema},
-  prompt: `You are an expert space weather analyst. Provide a concise summary of the following space weather events. Use the provided EDA context to highlight trends, distributions, and anomalies.
-
-DATA:
-{{eventData}}
-
-Focus on: event types, dates, locations, intensities, and potential impacts.
-`,
+  prompt: `You are an expert space weather analyst. Provide a concise summary of the following space weather events. Use the provided EDA context to highlight trends, distributions, and anomalies.\n\nDATA:\n{{eventData}}\n\nFocus on: event types, dates, locations, intensities, and potential impacts.\n`,
 });
 
 const generateEventSummaryFlow = ai.defineFlow(
