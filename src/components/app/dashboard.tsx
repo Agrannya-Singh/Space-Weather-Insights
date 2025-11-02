@@ -17,6 +17,7 @@ import { EventMap } from "./event-map";
 import { KpIndexChart } from "./kp-index-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AutoEda } from "./auto-eda";
+import LoginButton from "./login-button";
 
 export function Dashboard() {
   const [eventType, setEventType] = useState<EventType>("GST");
@@ -96,6 +97,7 @@ export function Dashboard() {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <aside className="lg:col-span-3">
             <div className="sticky top-24 space-y-6">
+                <LoginButton />
                 <Filters
                     eventType={eventType}
                     setEventType={setEventType}
