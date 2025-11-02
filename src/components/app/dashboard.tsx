@@ -7,7 +7,7 @@ const subDays = (date: Date, days: number): Date => new Date(date.getTime() - da
 const formatDate = (d: Date): string => d.toISOString().slice(0, 10);
 const parseISO = (s: string): Date => new Date(s);
 import { DonkiEvent, EventType } from "@/lib/types";
-import { getSpaceWeatherData } from "@/lib/actions";
+import { getSpaceWeatherData } from "@/lib/nasa/actions";
 import { useToast } from "@/hooks/use-toast";
 
 import { Filters } from "./filters";
