@@ -22,7 +22,7 @@ export function EventList({ events, eventType, loading }: EventListProps) {
         setVisibleCount(INITIAL_VISIBLE_COUNT);
     }, [events, eventType]);
 
-    const eventTypeLabel = eventTypes.find(e => e.value === eventType)?.label;
+    const eventTypeLabel = eventTypes[eventType];
 
     const handleLoadMore = () => {
         setVisibleCount(events.length);

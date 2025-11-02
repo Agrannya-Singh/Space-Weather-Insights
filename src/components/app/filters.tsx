@@ -52,8 +52,8 @@ export function Filters({
                                 <SelectValue placeholder="Select event type" />
                             </SelectTrigger>
                             <SelectContent>
-                                {eventTypes.map(et => (
-                                    <SelectItem key={et.value} value={et.value}>{et.label}</SelectItem>
+                                {Object.entries(eventTypes).map(([value, label]) => (
+                                    <SelectItem key={value} value={value}>{label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
