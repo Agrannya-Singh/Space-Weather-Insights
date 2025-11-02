@@ -11,12 +11,12 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { analyzeDataset } from '@/lib/eda';
-import { auth } from '@/lib/firebase/client';
-import { firestore } from '@/lib/firebase/client';
-import { doc, getDoc, setDoc, serverTimestamp, increment } from 'firebase/firestore';
+import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const GenerateEventSummaryInputSchema = z.object({
   eventData: z.string().describe('The JSON string of space weather events data from the DONKI API.'),
+  idToken: z.string().describe('The Firebase ID token of the user.'),
 });
 export type GenerateEventSummaryInput = z.infer<typeof GenerateEventSummaryInputSchema>;
 
@@ -26,17 +26,19 @@ const GenerateEventSummaryOutputSchema = z.object({
 export type GenerateEventSummaryOutput = z.infer<typeof GenerateEventSummaryOutputSchema>;
 
 export async function generateEventSummary(input: GenerateEventSummaryInput): Promise<GenerateEventSummaryOutput> {
-    const user = auth.currentUser;
-    if (!user) {
-        throw new Error('Please log in to access AI-powered features. This helps us ensure a high-quality experience for all users.');
+    let decodedToken;
+    try {
+        decodedToken = await adminAuth.verifyIdToken(input.idToken);
+    } catch (error) {
+        throw new Error('Invalid authentication token. Please log in again.');
     }
 
-    const userId = user.uid;
-    const summaryUsageRef = doc(firestore, 'summaryUsage', userId);
-    const summaryUsageSnap = await getDoc(summaryUsageRef);
+    const userId = decodedToken.uid;
+    const summaryUsageRef = adminDb.collection('summaryUsage').doc(userId);
+    const summaryUsageSnap = await summaryUsageRef.get();
 
-    if (summaryUsageSnap.exists()) {
-        const summaryUsageData = summaryUsageSnap.data();
+    if (summaryUsageSnap.exists) {
+        const summaryUsageData = summaryUsageSnap.data()!;
         const lastSummaryDate = summaryUsageData.lastSummaryDate.toDate();
         const now = new Date();
 
@@ -45,30 +47,29 @@ export async function generateEventSummary(input: GenerateEventSummaryInput): Pr
                 throw new Error('You have reached your daily limit of 10 summaries.');
             }
         } else {
-            await setDoc(summaryUsageRef, { summaryCount: 0, lastSummaryDate: serverTimestamp() }, { merge: true });
+            await summaryUsageRef.set({ summaryCount: 0, lastSummaryDate: new Date() }, { merge: true });
         }
     }
 
   const summary = await generateEventSummaryFlow(input);
 
     // Update daily summary count
-    if (summaryUsageSnap.exists()) {
-        const summaryUsageData = summaryUsageSnap.data();
-        await setDoc(summaryUsageRef, { summaryCount: summaryUsageData.summaryCount + 1, lastSummaryDate: serverTimestamp() }, { merge: true });
+    if (summaryUsageSnap.exists) {
+        await summaryUsageRef.update({ summaryCount: FieldValue.increment(1), lastSummaryDate: new Date() });
     } else {
-        await setDoc(summaryUsageRef, { summaryCount: 1, lastSummaryDate: serverTimestamp() });
+        await summaryUsageRef.set({ summaryCount: 1, lastSummaryDate: new Date() });
     }
 
     // Update permanent summary count in the users collection
-    const userRef = doc(firestore, 'users', userId);
-    await setDoc(userRef, { summaryCount: increment(1) }, { merge: true });
+    const userRef = adminDb.collection('users').doc(userId);
+    await userRef.update({ summaryCount: FieldValue.increment(1) });
 
   return summary;
 }
 
 const prompt = ai.definePrompt({
   name: 'generateEventSummaryPrompt',
-  input: {schema: GenerateEventSummaryInputSchema},
+  input: {schema: GenerateEventSummaryInputSchema.omit({ idToken: true })},
   output: {schema: GenerateEventSummaryOutputSchema},
   prompt: `You are an expert space weather analyst. Provide a concise summary of the following space weather events. Use the provided EDA context to highlight trends, distributions, and anomalies.\n\nDATA:\n{{eventData}}\n\nFocus on: event types, dates, locations, intensities, and potential impacts.\n`,
 });
@@ -76,7 +77,7 @@ const prompt = ai.definePrompt({
 const generateEventSummaryFlow = ai.defineFlow(
   {
     name: 'generateEventSummaryFlow',
-    inputSchema: GenerateEventSummaryInputSchema,
+    inputSchema: GenerateEventSummaryInputSchema.omit({ idToken: true }),
     outputSchema: GenerateEventSummaryOutputSchema,
   },
   async input => {

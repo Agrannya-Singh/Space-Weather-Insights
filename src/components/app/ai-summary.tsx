@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { auth } from '@/lib/firebase/client';
 
 type AiSummaryProps = {
     events: DonkiEvent[];
@@ -27,11 +28,23 @@ export function AiSummary({ events }: AiSummaryProps) {
             });
             return;
         }
+
+        const user = auth.currentUser;
+        if (!user) {
+            toast({
+                variant: 'destructive',
+                title: 'Authentication Required',
+                description: 'Please log in to access AI-powered features. This helps us ensure a high-quality experience for all users and prevents LLM abuse from malicious users.',
+            });
+            return;
+        }
+
         setLoading(true);
         setSummary('');
         try {
+            const idToken = await user.getIdToken();
             const eventData = JSON.stringify(events.slice(0, 50), null, 2);
-            const result = await generateEventSummary({ eventData });
+            const result = await generateEventSummary({ eventData, idToken });
             setSummary(result.summary);
         } catch (error) {
             console.error('AI summary generation failed:', error);
