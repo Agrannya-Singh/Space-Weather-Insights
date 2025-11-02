@@ -6,8 +6,7 @@
         "-y",
         "firebase-tools@latest",
         "experimental:mcp",
-        "--only",
-        "auth,firestore,database"
+        "auth,firestore"
       ]
     }
   }
