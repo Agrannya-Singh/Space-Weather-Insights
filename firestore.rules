@@ -10,5 +10,14 @@ service cloud.firestore {
     match /cache/{docId} {
       allow read, write: if true;
     }
+    // Rules for the summaryUsage collection
+    match /summaryUsage/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+    // Rules for the users collection
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId;
+      allow write: if false; // Deny all client-side writes
+    }
   }
 }

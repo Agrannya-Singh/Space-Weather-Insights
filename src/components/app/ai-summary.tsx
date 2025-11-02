@@ -35,11 +35,19 @@ export function AiSummary({ events }: AiSummaryProps) {
             setSummary(result.summary);
         } catch (error) {
             console.error('AI summary generation failed:', error);
-            toast({
-                variant: 'destructive',
-                title: 'Generation Failed',
-                description: 'An error occurred while generating the AI summary.',
-            });
+            if (error instanceof Error) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Generation Failed',
+                    description: error.message,
+                });
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Generation Failed',
+                    description: 'An error occurred while generating the AI summary.',
+                });
+            }
         } finally {
             setLoading(false);
         }

@@ -11,6 +11,9 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { analyzeDataset } from '@/lib/eda';
+import { auth } from '@/lib/firebase/client';
+import { firestore } from '@/lib/firebase/client';
+import { doc, getDoc, setDoc, serverTimestamp, increment } from 'firebase/firestore';
 
 const GenerateEventSummaryInputSchema = z.object({
   eventData: z.string().describe('The JSON string of space weather events data from the DONKI API.'),
@@ -23,7 +26,44 @@ const GenerateEventSummaryOutputSchema = z.object({
 export type GenerateEventSummaryOutput = z.infer<typeof GenerateEventSummaryOutputSchema>;
 
 export async function generateEventSummary(input: GenerateEventSummaryInput): Promise<GenerateEventSummaryOutput> {
-  return generateEventSummaryFlow(input);
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error('You must be logged in to generate a summary.');
+    }
+
+    const userId = user.uid;
+    const summaryUsageRef = doc(firestore, 'summaryUsage', userId);
+    const summaryUsageSnap = await getDoc(summaryUsageRef);
+
+    if (summaryUsageSnap.exists()) {
+        const summaryUsageData = summaryUsageSnap.data();
+        const lastSummaryDate = summaryUsageData.lastSummaryDate.toDate();
+        const now = new Date();
+
+        if (lastSummaryDate.toDateString() === now.toDateString()) {
+            if (summaryUsageData.summaryCount >= 10) {
+                throw new Error('You have reached your daily limit of 10 summaries.');
+            }
+        } else {
+            await setDoc(summaryUsageRef, { summaryCount: 0, lastSummaryDate: serverTimestamp() }, { merge: true });
+        }
+    }
+
+  const summary = await generateEventSummaryFlow(input);
+
+    // Update daily summary count
+    if (summaryUsageSnap.exists()) {
+        const summaryUsageData = summaryUsageSnap.data();
+        await setDoc(summaryUsageRef, { summaryCount: summaryUsageData.summaryCount + 1, lastSummaryDate: serverTimestamp() }, { merge: true });
+    } else {
+        await setDoc(summaryUsageRef, { summaryCount: 1, lastSummaryDate: serverTimestamp() });
+    }
+
+    // Update permanent summary count in the users collection
+    const userRef = doc(firestore, 'users', userId);
+    await setDoc(userRef, { summaryCount: increment(1) }, { merge: true });
+
+  return summary;
 }
 
 const prompt = ai.definePrompt({
