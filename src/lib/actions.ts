@@ -1,7 +1,8 @@
 
 'use server';
 
-import {getCache, setCache} from '@/lib/firestoreCache';
+import { getCache, setCache } from '@/lib/firestoreCache';
+import { adminAuth, adminDb } from '@/lib/firebase/server';
 
 const NASA_API_KEY = process.env.NASA_API_KEY;
 if (!NASA_API_KEY) {
@@ -37,4 +38,32 @@ export async function getNeoData() {
   await setCache(cacheKey, data);
 
   return data;
+}
+
+/**
+ * Creates a user document in Firestore after a successful sign-in.
+ * This is a server-side action to ensure security.
+ * @param idToken The Firebase ID token of the signed-in user.
+ */
+export async function createUserDocument(idToken: string): Promise<void> {
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+    const userRef = adminDb.collection('users').doc(uid);
+    const userSnap = await userRef.get();
+
+    if (!userSnap.exists) {
+      // New user, create a document for them
+      await userRef.set({
+        displayName: decodedToken.name,
+        email: decodedToken.email,
+        photoURL: decodedToken.picture,
+        createdAt: new Date(),
+        summaryCount: 0,
+      });
+    }
+  } catch (error) {
+    console.error('Error creating user document:', error);
+    throw new Error('Could not create user document on the server.');
+  }
 }

@@ -1,5 +1,5 @@
 
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server';
 
 const cacheCollection = adminDb.collection('cache');
 

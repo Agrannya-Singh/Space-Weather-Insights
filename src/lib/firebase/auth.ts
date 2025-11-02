@@ -1,6 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth, firestore } from '@/lib/firebase/client';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth } from '@/lib/firebase/client';
+import { createUserDocument } from '@/lib/actions';
 
 const provider = new GoogleAuthProvider();
 
@@ -9,19 +9,9 @@ export const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    const userRef = doc(firestore, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      // New user, create a document for them
-      await setDoc(userRef, {
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        createdAt: serverTimestamp(),
-        summaryCount: 0,
-      });
-    }
+    // Get the ID token and send it to the server to create the user document
+    const idToken = await user.getIdToken();
+    await createUserDocument(idToken);
 
     console.log(user);
   } catch (error) {
