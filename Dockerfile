@@ -1,46 +1,88 @@
 # syntax=docker/dockerfile:1.4
 
-# Use the Node.js 20 slim image
-FROM node:20-slim
+#so the login issuue (Fiebase Auth ) issue was caused because we were not setting the enviorment vars in the docer file at all .
+# Agrannya Singh approves of this docker file 
 
-# Set the working directory
+# ==================================================================
+# Stage 1: The "Builder" Stage
+# This stage builds the app. The final image won't contain
+# any of its files unless we explicitly copy them.
+# ==================================================================
+FROM node:20-slim AS builder
 WORKDIR /app
 
-# Update npm to the latest version first
-RUN npm install -g npm@latest
+# 1. Install all dependencies
+# This layer is cached as long as package.json/lock don't change
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Copy configuration and package files first
-COPY package.json package-lock.json tsconfig.json ./
-
-# Install ALL dependencies, temporarily setting NODE_ENV to development
-# to ensure all build tools are definitely installed if there's an edge case.
-# Use npm install instead of ci as a potential workaround.
-ARG NODE_ENV=development
-RUN npm install --no-audit --no-fund && npm cache clean --force
-
-# Copy the rest of the application code
+# 2. Copy the rest of the source code
+# This is done *after* npm ci to optimize caching
 COPY . .
 
-# Now set NODE_ENV to production for the build and runtime
+# 3. Set Build-Time Environment Variables
+# These ARGs will be populated by Render from your dashboard
+ARG NEXT_PUBLIC_FIREBASE_API_KEY
+ARG NEXT_PUBLIC_FIREBASE_APP_ID
+ARG NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+ARG NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+ARG NEXT_PUBLIC_FIREBASE_PROJECT_ID
+ARG NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+ARG NASA_API_KEY
+ARG MONGODB_URI
+
+# Set ENV for the build process
+ENV NEXT_PUBLIC_FIREBASE_API_KEY=$NEXT_PUBLIC_FIREBASE_API_KEY
+ENV NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID
+ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID=$NEXT_PUBLIC_FIREBASE_PROJECT_ID
+ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+ENV NASA_API_KEY=$NASA_API_KEY
+ENV MONGODB_URI=$MONGODB_URI
+
+# 4. Build the Next.js application
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+
+# ==================================================================
+# Stage 2: The "Runner" Stage
+# This is the final, small, secure image that will run in production.
+# ==================================================================
+FROM node:20-slim AS runner
+
+WORKDIR /app
+
+# Set environment for production
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# Build the Next.js application
-RUN npm run build
-
-# Create a non-root user for security
+# 1. Create a non-root user for security
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 --gid 1001 nextjs
 
-# Change ownership (Consider optimizing later if needed)
-RUN chown -R nextjs:nodejs /app
+# 2. Install *only* production dependencies
+# Copy package files from builder and run npm ci --omit=dev
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+RUN npm ci --omit=dev
 
-# Switch to the non-root user
+# 3. Copy built application files from the builder stage
+# We use --chown to set the correct owner immediately
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+# 4. Switch to the non-root user
 USER nextjs
 
+# 5. Expose the port
 EXPOSE 3000
 
-# Start the application
+# 6. Start the application
+# 'npm start' should be defined in your package.json to run 'next start'
 CMD ["npm", "start"]
