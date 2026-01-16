@@ -4,9 +4,9 @@
 
 This project provides a dashboard to track solar activity events using data from NASA's Space Weather Database of Notifications, Knowledge, and Information (DONKI). Built with Next.js and Firebase, this application offers an experience for exploring solar activity. It includes a custom EDA engine in TypeScript that automates the generation of 5+ chart types, reducing manual analysis time by an estimated 80%.
 
-Deployment via Docker: https://space-weather-insights.onrender.com
-Figma Sites Link: https://chest-orchid-71762224.figma.site/ (public)
-Figma Prototype :https://www.figma.com/make/I4lwVP3zJBwc5bR6A5IT89/Solar-Oracle?fullscreen=1&t=wzhQu0GiKOlCp5m4-1 (for dev usage needs permission for access)
+* Deployment via Docker: https://space-weather-insights.onrender.com
+* Figma Sites Link: https://chest-orchid-71762224.figma.site/ (public)
+* Figma Prototype :https://www.figma.com/make/I4lwVP3zJBwc5bR6A5IT89/Solar-Oracle?fullscreen=1&t=wzhQu0GiKOlCp5m4-1 (for dev usage needs permission for access)
 
 ### Key Features
 
