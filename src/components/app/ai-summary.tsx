@@ -14,7 +14,7 @@ type AiSummaryProps = {
     eventType: EventType;
 };
 
-export function AiSummary({ events }: AiSummaryProps) {
+export function AiSummary({ events, eventType }: AiSummaryProps) {
     const [summary, setSummary] = useState('');
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
@@ -44,7 +44,7 @@ export function AiSummary({ events }: AiSummaryProps) {
         try {
             const idToken = await user.getIdToken();
             const eventData = JSON.stringify(events.slice(0, 50), null, 2);
-            const result = await generateEventSummary({ eventData, idToken });
+            const result = await generateEventSummary({ eventData, eventType: events.length > 0 ? (eventType || 'GST') : 'GST', idToken });
             setSummary(result.summary);
         } catch (error) {
             console.error('AI summary generation failed:', error);

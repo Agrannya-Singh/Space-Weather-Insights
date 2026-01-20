@@ -8,6 +8,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 
 const GenerateEventSummaryInputSchema = z.object({
   eventData: z.string().describe('The JSON string of space weather events data from the DONKI API.'),
+  eventType: z.string().describe('The type of event being analyzed (e.g. FLR, GST).'),
   idToken: z.string().describe('The Firebase ID token of the user.'),
 });
 export type GenerateEventSummaryInput = z.infer<typeof GenerateEventSummaryInputSchema>;
@@ -78,7 +79,7 @@ const generateEventSummaryFlow = ai.defineFlow(
     try {
       const parsed = JSON.parse(input.eventData);
       if (Array.isArray(parsed)) {
-        const eda = analyzeDataset(parsed.slice(0, 200));
+        const eda = analyzeDataset(parsed.slice(0, 200), input.eventType);
         const numeric = eda.fields
           .filter((f) => !!f.numeric)
           .slice(0, 3)
@@ -95,20 +96,18 @@ const generateEventSummaryFlow = ai.defineFlow(
             field: f.field,
             top: (f.categorical ?? []).slice(0, 5),
           }));
-        edaSnippet = `EDA rows=${
-          eda.rowCount
-        }, fields=${
-          eda.fields.length
-        }, timeField=${
-          eda.detectedTimeField
-        }; numeric=${JSON.stringify(numeric)}, categorical=${JSON.stringify(
-          categorical
-        )}`;
+        edaSnippet = `EDA rows=${eda.rowCount
+          }, fields=${eda.fields.length
+          }, timeField=${eda.detectedTimeField
+          }; numeric=${JSON.stringify(numeric)}, categorical=${JSON.stringify(
+            categorical
+          )}`;
       }
-    } catch {}
+    } catch { }
 
     const { output } = await prompt({
       eventData: `${input.eventData}\n\nEDA:${edaSnippet}`,
+      eventType: input.eventType,
     });
     return output!;
   }
