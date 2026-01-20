@@ -9,34 +9,34 @@
 export type InferredType = 'number' | 'integer' | 'boolean' | 'datetime' | 'string' | 'null' | 'heliographic' | 'ignored';
 
 export interface FieldSummary {
-  field: string;
-  type: InferredType;
-  missingCount: number;
-  missingPercent: number;
-  cardinality?: number;
-  sampleValues: any[];
-  numeric?: {
-    count: number;
-    min: number;
-    max: number;
-    mean: number;
-    median: number;
-    p25: number;
-    p75: number;
-    stddev: number;
-  };
-  categorical?: Array<{ value: string; count: number }>;
+    field: string;
+    type: InferredType;
+    missingCount: number;
+    missingPercent: number;
+    cardinality?: number;
+    sampleValues: any[];
+    numeric?: {
+        count: number;
+        min: number;
+        max: number;
+        mean: number;
+        median: number;
+        p25: number;
+        p75: number;
+        stddev: number;
+    };
+    categorical?: Array<{ value: string; count: number }>;
 }
 
 export interface EdaResult {
-  rowCount: number;
-  fields: FieldSummary[];
-  processedData: any[]; // The cleaned, flattened data for frontend use
-  detectedTimeField?: string;
-  correlation?: {
-    fields: string[];
-    matrix: number[][];
-  };
+    rowCount: number;
+    fields: FieldSummary[];
+    processedData: any[]; // The cleaned, flattened data for frontend use
+    detectedTimeField?: string;
+    correlation?: {
+        fields: string[];
+        matrix: number[][];
+    };
 }
 
 // --- EDA Blacklist Configuration ---
@@ -48,30 +48,30 @@ const EDA_BLACKLIST_PATTERNS: RegExp[] = [
 
 // Helper to check if a field should be ignored for detailed analysis
 function isBlacklistedForAnalysis(fieldName: string): boolean {
-  return EDA_BLACKLIST_PATTERNS.some(pattern => pattern.test(fieldName));
+    return EDA_BLACKLIST_PATTERNS.some(pattern => pattern.test(fieldName));
 }
 
 // --- Parsing and Type Inference Helpers ---
 function tryParseNumber(value: any): number | null {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (trimmed === '' || isNaN(Number(trimmed))) return null;
-    const parsed = Number(trimmed);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-  return null;
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (trimmed === '' || isNaN(Number(trimmed))) return null;
+        const parsed = Number(trimmed);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
 }
 
 function tryParseHeliographic(value: any): { lat: number; lon: number } | null {
-  if (typeof value !== 'string' || !value) return null;
-  const match = value.trim().match(/^([NS])(\d+)([EW])(\d+)$/i);
-  if (!match) return null;
-  const [, latDir, latVal, lonDir, lonVal] = match;
-  const lat = parseInt(latVal, 10) * (latDir.toUpperCase() === 'S' ? -1 : 1);
-  const lon = parseInt(lonVal, 10) * (lonDir.toUpperCase() === 'W' ? 1 : -1);
-  if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
-  return { lat, lon };
+    if (typeof value !== 'string' || !value) return null;
+    const match = value.trim().match(/^([NS])(\d+)([EW])(\d+)$/i);
+    if (!match) return null;
+    const [, latDir, latVal, lonDir, lonVal] = match;
+    const lat = parseInt(latVal, 10) * (latDir.toUpperCase() === 'S' ? -1 : 1);
+    const lon = parseInt(lonVal, 10) * (lonDir.toUpperCase() === 'W' ? 1 : -1);
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+    return { lat, lon };
 }
 
 function inferFieldType(values: any[]): InferredType {
@@ -92,7 +92,7 @@ function inferFieldType(values: any[]): InferredType {
     const ratio = (count: number) => count / nonNullCount;
 
     if (ratio(heliographicCount) > 0.9) return 'heliographic';
-    if (ratio(numberCount) > 0.9) {
+    if (ratio(numberCount) > 0.8) {
         const allIntegers = sample.every(v => {
             const n = tryParseNumber(v);
             return n === null || Number.isInteger(n);
@@ -106,20 +106,20 @@ function inferFieldType(values: any[]): InferredType {
 
 // --- Statistical Helpers ---
 function quantiles(sortedNumbers: number[], q: number): number {
-  if (sortedNumbers.length === 0) return NaN;
-  const pos = (sortedNumbers.length - 1) * q;
-  const base = Math.floor(pos);
-  const rest = pos - base;
-  return sortedNumbers[base] + (rest * (sortedNumbers[base + 1] - sortedNumbers[base]) || 0);
+    if (sortedNumbers.length === 0) return NaN;
+    const pos = (sortedNumbers.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    return sortedNumbers[base] + (rest * (sortedNumbers[base + 1] - sortedNumbers[base]) || 0);
 }
 
 function stdDev(numbers: number[], mean: number): number {
-  if (numbers.length <= 1) return 0;
-  const variance = numbers.reduce((acc, n) => acc + Math.pow(n - mean, 2), 0) / (numbers.length - 1);
-  return Math.sqrt(variance);
+    if (numbers.length <= 1) return 0;
+    const variance = numbers.reduce((acc, n) => acc + Math.pow(n - mean, 2), 0) / (numbers.length - 1);
+    return Math.sqrt(variance);
 }
 
-function pearsonCorrelation(x: (number|null)[], y: (number|null)[]): number {
+function pearsonCorrelation(x: (number | null)[], y: (number | null)[]): number {
     let n = 0;
     let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, sumYY = 0;
 
@@ -144,7 +144,7 @@ function pearsonCorrelation(x: (number|null)[], y: (number|null)[]): number {
 function preprocessData(rows: any[], eventType: string): any[] {
     if (!Array.isArray(rows)) return [];
 
-    let processed = rows.map(row => ({...row}));
+    let processed = rows.map(row => ({ ...row }));
 
     if (eventType === 'CME') {
         processed = rows.map(event => {
@@ -172,9 +172,9 @@ function preprocessData(rows: any[], eventType: string): any[] {
         });
     } else if (eventType === 'GST') {
         processed = rows.map(event => {
-            if (!event.allKpIndex?.length) return {...event, maxKpIndex: null};
+            if (!event.allKpIndex?.length) return { ...event, maxKpIndex: null };
             const maxKp = event.allKpIndex.reduce((max: number, kp: any) => Math.max(max, kp.kpIndex || 0), 0);
-            return {...event, maxKpIndex: maxKp};
+            return { ...event, maxKpIndex: maxKp };
         });
     }
 
@@ -196,7 +196,7 @@ export function analyzeDataset(rows: any[], eventType: string): EdaResult {
     let detectedTimeField: string | undefined = undefined;
 
     for (const field of fieldNames) {
-        const values = processedData.map(r => r[field]);
+        const values = processedData.map((r: any) => r[field]);
         const nonNullValues = values.filter(v => v !== null && v !== undefined && String(v).trim() !== '');
 
         const summary: FieldSummary = {
@@ -268,23 +268,23 @@ export function analyzeDataset(rows: any[], eventType: string): EdaResult {
 }
 
 export function basicCsvParse(text: string): any[] {
-  const lines = text.split(/\r?\n/).filter(l => l.trim());
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-  return lines.slice(1).map(line => {
-    const values = line.split(',');
-    return headers.reduce((obj, header, index) => {
-      const rawValue = values[index];
-      const cleanedValue = rawValue !== undefined ? rawValue.trim().replace(/^"|"$/g, '') : null;
-      obj[header] = cleanedValue;
-      return obj;
-    }, {} as Record<string, any>);
-  });
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    return lines.slice(1).map(line => {
+        const values = line.split(',');
+        return headers.reduce((obj, header, index) => {
+            const rawValue = values[index];
+            const cleanedValue = rawValue !== undefined ? rawValue.trim().replace(/^"|"$/g, '') : null;
+            obj[header] = cleanedValue;
+            return obj;
+        }, {} as Record<string, any>);
+    });
 }
 
 // --- Exported for Testing ---
 export const _test = {
-  tryParseNumber, tryParseHeliographic, inferFieldType,
-  quantiles, stdDev, pearsonCorrelation,
-  preprocessData,
+    tryParseNumber, tryParseHeliographic, inferFieldType,
+    quantiles, stdDev, pearsonCorrelation,
+    preprocessData,
 };          

@@ -99,7 +99,7 @@ export function EventMap({ events, loading }: EventMapProps) {
                 <TooltipContent>
                   <p className="font-bold">{event.flrID || event.cmeAnalyses?.[0]?.cmeID || "Event"}</p>
                   <p>Start: {startTime ? format(new Date(startTime), 'PPp') : 'N/A'}</p>
-                  <p>Location: {event.sourceLocation || event.cmeAnalyses?.[0]?.sourceLocation}</p>
+                  <p>Location: {typeof (event.sourceLocation || event.cmeAnalyses?.[0]?.sourceLocation) === 'object' ? JSON.stringify(event.sourceLocation || event.cmeAnalyses?.[0]?.sourceLocation) : (event.sourceLocation || event.cmeAnalyses?.[0]?.sourceLocation ?? 'N/A')}</p>
                 </TooltipContent>
               </Tooltip>
             );

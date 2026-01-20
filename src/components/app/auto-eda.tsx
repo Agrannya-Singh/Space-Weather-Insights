@@ -9,63 +9,63 @@ import { EventType } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AutoEdaProps {
-  data: any[];
-  eventType: EventType;
+    data: any[];
+    eventType: EventType;
 }
 
 // --- Reusable Chart Components ---
 
 const HistogramChart = ({ field, rows }: { field: FieldSummary; rows: any[] }) => {
-  const histogramData = useMemo(() => {
-    if (!field.numeric) return [];
-    const { min, max } = field.numeric;
-    if (!isFinite(min) || !isFinite(max) || min === max) return [];
-    const binCount = 10;
-    const width = (max - min) / binCount;
-    const bins = Array.from({ length: binCount }, (_, i) => ({
-      name: (min + i * width).toFixed(1),
-      count: 0,
-    }));
-    const values = rows.map(r => r[field.field]).map(Number).filter(isFinite);
-    for (const v of values) {
-      let idx = Math.floor((v - min) / width);
-      if (idx >= binCount) idx = binCount - 1;
-      if (idx < 0) idx = 0;
-      bins[idx].count++;
-    }
-    return bins;
-  }, [field, rows]);
+    const histogramData = useMemo(() => {
+        if (!field.numeric) return [];
+        const { min, max } = field.numeric;
+        if (!isFinite(min) || !isFinite(max) || min === max) return [];
+        const binCount = 10;
+        const width = (max - min) / binCount;
+        const bins = Array.from({ length: binCount }, (_, i) => ({
+            name: (min + i * width).toFixed(1),
+            count: 0,
+        }));
+        const values = rows.map(r => r[field.field]).map(Number).filter(isFinite);
+        for (const v of values) {
+            let idx = Math.floor((v - min) / width);
+            if (idx >= binCount) idx = binCount - 1;
+            if (idx < 0) idx = 0;
+            bins[idx].count++;
+        }
+        return bins;
+    }, [field, rows]);
 
-  if (histogramData.length === 0) return <p className="text-sm text-muted-foreground">Not enough data for histogram.</p>;
+    if (histogramData.length === 0) return <p className="text-sm text-muted-foreground">Not enough data for histogram.</p>;
 
-  return (
-    <ResponsiveContainer width="100%" height={250}>
-      <BarChart data={histogramData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-        <YAxis />
-        <ReTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="count" fill="hsl(var(--primary))" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+    return (
+        <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={histogramData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis />
+                <ReTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="count" fill="hsl(var(--primary))" />
+            </BarChart>
+        </ResponsiveContainer>
+    );
 };
 
 const CategoricalBarChart = ({ field }: { field: FieldSummary }) => {
-  const data = field.categorical?.slice(0, 10) ?? [];
-  if (data.length === 0) return <p className="text-sm text-muted-foreground">Not enough data for chart.</p>;
+    const data = field.categorical?.slice(0, 10) ?? [];
+    if (data.length === 0) return <p className="text-sm text-muted-foreground">Not enough data for chart.</p>;
 
-  return (
-    <ResponsiveContainer width="100%" height={250}>
-      <BarChart data={data} layout="vertical" margin={{ left: 30 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis type="number" />
-        <YAxis dataKey="value" type="category" width={80} tick={{ fontSize: 10 }} />
-        <ReTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="count" fill="hsl(var(--chart-2))" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+    return (
+        <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={data} layout="vertical" margin={{ left: 30 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="value" type="category" width={80} tick={{ fontSize: 10 }} />
+                <ReTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="count" fill="hsl(var(--chart-2))" />
+            </BarChart>
+        </ResponsiveContainer>
+    );
 };
 
 const ScatterPlot = ({ xField, yField, rows }: { xField: string; yField: string; rows: any[] }) => {
@@ -129,7 +129,7 @@ const PolarPlot = ({ latField, lonField, rows }: { latField: string; lonField: s
     if (polarData.length === 0) return <p className="text-sm text-muted-foreground">No location data for polar plot.</p>;
 
     return (
-      <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={250}>
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={polarData}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="longitude" type="number" domain={[-180, 180]} tick={{ fontSize: 10 }} />
@@ -137,7 +137,7 @@ const PolarPlot = ({ latField, lonField, rows }: { latField: string; lonField: s
                 <ReTooltip content={<ChartTooltipContent />} />
                 <Radar name="Location" dataKey="latitude" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} />
             </RadarChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
     );
 }
 
@@ -154,7 +154,7 @@ export function AutoEda({ data, eventType }: AutoEdaProps) {
 
     const numericFields = fields.filter(f => f.numeric && f.type !== 'ignored');
     const categoricalFields = fields.filter(f => f.categorical && f.cardinality && f.cardinality > 1 && f.cardinality < 20 && f.type !== 'ignored');
-    
+
     const latField = fields.find(f => f.field.toLowerCase().includes('lat') && f.type !== 'ignored');
     const lonField = fields.find(f => f.field.toLowerCase().includes('lon') && f.type !== 'ignored');
 
@@ -174,38 +174,45 @@ export function AutoEda({ data, eventType }: AutoEdaProps) {
 
                     <TabsContent value="visualizations" className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {detectedTimeField && <Card><CardHeader><CardTitle>Events Over Time</CardTitle></CardHeader><CardContent><TimeSeriesChart timeField={detectedTimeField} rows={processedData} /></CardContent></Card>}
-                        {numericFields[0] && <Card><CardHeader><CardTitle>Histogram: {numericFields[0].field}</CardTitle></CardHeader><CardContent><HistogramChart field={numericFields[0]} rows={processedData} /></CardContent></Card>}
-                        {categoricalFields[0] && <Card><CardHeader><CardTitle>Distribution: {categoricalFields[0].field}</CardTitle></CardHeader><CardContent><CategoricalBarChart field={categoricalFields[0]} /></CardContent></Card>}
-                        {numericFields.length >= 2 && <Card><CardHeader><CardTitle>Scatter: {numericFields[0].field} vs {numericFields[1].field}</CardTitle></CardHeader><CardContent><ScatterPlot xField={numericFields[0].field} yField={numericFields[1].field} rows={processedData} /></CardContent></Card>}
+
                         {latField && lonField && <Card><CardHeader><CardTitle>Heliographic Location</CardTitle></CardHeader><CardContent><PolarPlot latField={latField.field} lonField={lonField.field} rows={processedData} /></CardContent></Card>}
-                        {numericFields[1] && <Card><CardHeader><CardTitle>Histogram: {numericFields[1].field}</CardTitle></CardHeader><CardContent><HistogramChart field={numericFields[1]} rows={processedData} /></CardContent></Card>}
+
+                        {numericFields.slice(0, 6).map(field => (
+                            <Card key={field.field}><CardHeader><CardTitle>Histogram: {field.field}</CardTitle></CardHeader><CardContent><HistogramChart field={field} rows={processedData} /></CardContent></Card>
+                        ))}
+
+                        {categoricalFields.slice(0, 4).map(field => (
+                            <Card key={field.field}><CardHeader><CardTitle>Distribution: {field.field}</CardTitle></CardHeader><CardContent><CategoricalBarChart field={field} /></CardContent></Card>
+                        ))}
+
+                        {numericFields.length >= 2 && <Card><CardHeader><CardTitle>Scatter: {numericFields[0].field} vs {numericFields[1].field}</CardTitle></CardHeader><CardContent><ScatterPlot xField={numericFields[0].field} yField={numericFields[1].field} rows={processedData} /></CardContent></Card>}
                     </TabsContent>
 
                     <TabsContent value="summary" className="mt-4">
-                       <div className="max-h-[400px] overflow-y-auto">
-                        <table className="w-full text-xs">
-                            <thead className="sticky top-0 bg-muted">
-                                <tr>
-                                    <th className="p-2 text-left">Field</th>
-                                    <th className="p-2 text-left">Type</th>
-                                    <th className="p-2 text-left">Missing</th>
-                                    <th className="p-2 text-left">Mean / Top Category</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {fields.map(f => (
-                                    <tr key={f.field} className="border-t">
-                                        <td className="p-2 font-medium">{f.field}</td>
-                                        <td className="p-2">{f.type}</td>
-                                        <td className="p-2">{f.missingPercent.toFixed(1)}%</td>
-                                        <td className="p-2 truncate max-w-[200px]">
-                                            {f.numeric ? f.numeric.mean.toFixed(2) : (f.categorical ? f.categorical[0]?.value : 'N/A')}
-                                        </td>
+                        <div className="max-h-[400px] overflow-y-auto">
+                            <table className="w-full text-xs">
+                                <thead className="sticky top-0 bg-muted">
+                                    <tr>
+                                        <th className="p-2 text-left">Field</th>
+                                        <th className="p-2 text-left">Type</th>
+                                        <th className="p-2 text-left">Missing</th>
+                                        <th className="p-2 text-left">Mean / Top Category</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                       </div>
+                                </thead>
+                                <tbody>
+                                    {fields.map(f => (
+                                        <tr key={f.field} className="border-t">
+                                            <td className="p-2 font-medium">{f.field}</td>
+                                            <td className="p-2">{f.type}</td>
+                                            <td className="p-2">{f.missingPercent.toFixed(1)}%</td>
+                                            <td className="p-2 truncate max-w-[200px]">
+                                                {f.numeric ? f.numeric.mean.toFixed(2) : (f.categorical ? f.categorical[0]?.value : 'N/A')}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </TabsContent>
 
                     <TabsContent value="correlation" className="mt-4">
