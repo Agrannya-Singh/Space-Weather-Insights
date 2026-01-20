@@ -4,18 +4,18 @@
 import { getCache, setCache } from '@/lib/firestoreCache';
 import { adminAuth, adminDb } from '@/lib/firebase/server';
 
-const NASA_API_KEY = process.env.NASA_API_KEY;
-if (!NASA_API_KEY) {
-  throw new Error("NASA_API_KEY is not set in the environment variables.");
-}
-
-const API_URL = `https://api.nasa.gov/neo/rest/v1/feed?api_key=${NASA_API_KEY}`;
 
 /**
  * Fetches data from the NASA API, using a cache to store and retrieve results.
  * This function is designed to be called from a Server Component.
  */
 export async function getNeoData() {
+  const NASA_API_KEY = process.env.NASA_API_KEY;
+  if (!NASA_API_KEY) {
+    throw new Error("NASA_API_KEY is not set in the environment variables.");
+  }
+  const API_URL = `https://api.nasa.gov/neo/rest/v1/feed?api_key=${NASA_API_KEY}`;
+
   const cacheKey = 'neo-data';
 
   // First, try to get the data from the cache.
