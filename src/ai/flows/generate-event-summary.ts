@@ -84,7 +84,10 @@ export async function generateEventSummary(input: GenerateEventSummaryInput): Pr
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-  const prompt = `You are an expert space weather analyst. Provide a concise summary of the following space weather events. Use the provided EDA context to highlight trends, distributions, and anomalies.
+  const prompt = `Provide a concise summary of the following space weather events in 200-300 words. 
+Do NOT include any introductory or concluding remarks like "As a space weather specialist..." or "Here is my review...". Just provide the summary directly.
+Use plain and simple English. 
+Do NOT use Markdown formatting like bold stars (***), hashtags (#), or any other special characters. Use only plain text.
 
 DATA:
 ${input.eventData}
@@ -92,7 +95,7 @@ ${input.eventData}
 EDA CONTEXT:
 ${edaSnippet}
 
-Focus on: event types, dates, locations, intensities, and potential impacts.`;
+Focus on: event types, dates, locations, intensities, and potential impacts based on the trends, distributions, and anomalies in the data.`;
 
   try {
     const result = await model.generateContent(prompt);
