@@ -3,7 +3,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { analyzeDataset } from '@/lib/eda';
-import { adminAuth, adminDb } from '@/lib/firebase/server';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/server';
 import { FieldValue } from 'firebase-admin/firestore';
 
 const GenerateEventSummaryInputSchema = z.object({
@@ -21,13 +21,13 @@ export type GenerateEventSummaryOutput = z.infer<typeof GenerateEventSummaryOutp
 export async function generateEventSummary(input: GenerateEventSummaryInput): Promise<GenerateEventSummaryOutput> {
   let decodedToken;
   try {
-    decodedToken = await adminAuth.verifyIdToken(input.idToken);
+    decodedToken = await getAdminAuth().verifyIdToken(input.idToken);
   } catch (error) {
     throw new Error('Invalid authentication token. Please log in again.');
   }
 
   const userId = decodedToken.uid;
-  const summaryUsageRef = adminDb.collection('summaryUsage').doc(userId);
+  const summaryUsageRef = getAdminDb().collection('summaryUsage').doc(userId);
   const summaryUsageSnap = await summaryUsageRef.get();
 
   if (summaryUsageSnap.exists) {
@@ -54,7 +54,7 @@ export async function generateEventSummary(input: GenerateEventSummaryInput): Pr
   }
 
   // Update permanent summary count in the users collection
-  const userRef = adminDb.collection('users').doc(userId);
+  const userRef = getAdminDb().collection('users').doc(userId);
   await userRef.set({ summaryCount: FieldValue.increment(1) }, { merge: true });
 
   return summary;

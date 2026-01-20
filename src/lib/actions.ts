@@ -2,7 +2,7 @@
 'use server';
 
 import { getCache, setCache } from '@/lib/firestoreCache';
-import { adminAuth, adminDb } from '@/lib/firebase/server';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/server';
 
 
 /**
@@ -15,6 +15,7 @@ export async function getNeoData() {
     throw new Error("NASA_API_KEY is not set in the environment variables.");
   }
   const API_URL = `https://api.nasa.gov/neo/rest/v1/feed?api_key=${NASA_API_KEY}`;
+
 
   const cacheKey = 'neo-data';
 
@@ -47,9 +48,9 @@ export async function getNeoData() {
  */
 export async function createUserDocument(idToken: string): Promise<void> {
   try {
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const decodedToken = await getAdminAuth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
-    const userRef = adminDb.collection('users').doc(uid);
+    const userRef = getAdminDb().collection('users').doc(uid);
     const userSnap = await userRef.get();
 
     if (!userSnap.exists) {

@@ -2,7 +2,7 @@
 'use server';
 
 import { getCache, setCache } from '@/lib/firestoreCache';
-import { adminDb } from '@/lib/firebase/server';
+import { getAdminDb } from '@/lib/firebase/server';
 
 
 interface SpaceWeatherParams {

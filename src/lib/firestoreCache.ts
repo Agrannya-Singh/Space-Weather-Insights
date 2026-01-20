@@ -1,7 +1,9 @@
 
-import { adminDb } from '@/lib/firebase/server';
+import { getAdminDb } from '@/lib/firebase/server';
 
-const cacheCollection = adminDb.collection('cache');
+function getCacheCollection() {
+  return getAdminDb().collection('cache');
+}
 
 // Set a 12-hour Time-to-Live (TTL) for cache entries, in milliseconds.
 const TTL = 12 * 60 * 60 * 1000;
@@ -14,7 +16,7 @@ const TTL = 12 * 60 * 60 * 1000;
  * @returns {Promise<any | null>} The cached value, or null if not found or expired.
  */
 export async function getCache(key: string) {
-  const docRef = cacheCollection.doc(key);
+  const docRef = getCacheCollection().doc(key);
   const doc = await docRef.get();
 
   if (!doc.exists) {
@@ -47,5 +49,5 @@ export async function getCache(key: string) {
  */
 export async function setCache(key: string, value: any) {
   const timestamp = new Date().getTime();
-  await cacheCollection.doc(key).set({ value, timestamp });
+  await getCacheCollection().doc(key).set({ value, timestamp });
 }
