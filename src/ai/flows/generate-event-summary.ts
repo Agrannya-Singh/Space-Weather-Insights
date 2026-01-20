@@ -1,7 +1,7 @@
 'use server';
 
-import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { z } from 'zod';
 import { analyzeDataset } from '@/lib/eda';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase/server';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -44,71 +44,76 @@ export async function generateEventSummary(input: GenerateEventSummaryInput): Pr
     }
   }
 
-  const summary = await generateEventSummaryFlow(input);
+  // Generate Summary Logic
+  // Build lightweight EDA context for the AI (top-level stats only)
+  let edaSnippet = '';
+  try {
+    const parsed = JSON.parse(input.eventData);
+    if (Array.isArray(parsed)) {
+      const eda = analyzeDataset(parsed.slice(0, 200), input.eventType);
+      const numeric = eda.fields
+        .filter((f) => !!f.numeric)
+        .slice(0, 3)
+        .map((f) => ({
+          field: f.field,
+          min: f.numeric!.min,
+          max: f.numeric!.max,
+          mean: f.numeric!.mean,
+        }));
+      const categorical = eda.fields
+        .filter((f) => !!f.categorical)
+        .slice(0, 2)
+        .map((f) => ({
+          field: f.field,
+          top: (f.categorical ?? []).slice(0, 5),
+        }));
+      edaSnippet = `EDA rows=${eda.rowCount
+        }, fields=${eda.fields.length
+        }, timeField=${eda.detectedTimeField
+        }; numeric=${JSON.stringify(numeric)}, categorical=${JSON.stringify(
+          categorical
+        )}`;
+    }
+  } catch (e) { console.error('EDA generation failed:', e); }
 
-  // Update daily summary count
-  if (summaryUsageSnap.exists) {
-    await summaryUsageRef.update({ summaryCount: FieldValue.increment(1), lastSummaryDate: new Date() });
-  } else {
-    await summaryUsageRef.set({ summaryCount: 1, lastSummaryDate: new Date() });
+  const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('Google Generative AI API key is missing. Set GOOGLE_GENAI_API_KEY or GEMINI_API_KEY.');
   }
 
-  // Update permanent summary count in the users collection
-  const userRef = getAdminDb().collection('users').doc(userId);
-  await userRef.set({ summaryCount: FieldValue.increment(1) }, { merge: true });
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-  return summary;
+  const prompt = `You are an expert space weather analyst. Provide a concise summary of the following space weather events. Use the provided EDA context to highlight trends, distributions, and anomalies.
+
+DATA:
+${input.eventData}
+
+EDA CONTEXT:
+${edaSnippet}
+
+Focus on: event types, dates, locations, intensities, and potential impacts.`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const summary = response.text();
+
+    // Update daily summary count
+    if (summaryUsageSnap.exists) {
+      await summaryUsageRef.update({ summaryCount: FieldValue.increment(1), lastSummaryDate: new Date() });
+    } else {
+      await summaryUsageRef.set({ summaryCount: 1, lastSummaryDate: new Date() });
+    }
+
+    // Update permanent summary count
+    const userRef = getAdminDb().collection('users').doc(userId);
+    await userRef.set({ summaryCount: FieldValue.increment(1) }, { merge: true });
+
+    return { summary };
+
+  } catch (error) {
+    console.error('AI Generation failed:', error);
+    throw new Error('Failed to generate summary from AI provider.');
+  }
 }
-
-const prompt = ai.definePrompt({
-  name: 'generateEventSummaryPrompt',
-  input: { schema: GenerateEventSummaryInputSchema.omit({ idToken: true }) },
-  output: { schema: GenerateEventSummaryOutputSchema },
-  prompt: `You are an expert space weather analyst. Provide a concise summary of the following space weather events. Use the provided EDA context to highlight trends, distributions, and anomalies.\n\nDATA:\n{{eventData}}\n\nFocus on: event types, dates, locations, intensities, and potential impacts.\n`,
-});
-
-const generateEventSummaryFlow = ai.defineFlow(
-  {
-    name: 'generateEventSummaryFlow',
-    inputSchema: GenerateEventSummaryInputSchema.omit({ idToken: true }),
-    outputSchema: GenerateEventSummaryOutputSchema,
-  },
-  async (input) => {
-    // Build lightweight EDA context for the AI (top-level stats only)
-    let edaSnippet = '';
-    try {
-      const parsed = JSON.parse(input.eventData);
-      if (Array.isArray(parsed)) {
-        const eda = analyzeDataset(parsed.slice(0, 200), input.eventType);
-        const numeric = eda.fields
-          .filter((f) => !!f.numeric)
-          .slice(0, 3)
-          .map((f) => ({
-            field: f.field,
-            min: f.numeric!.min,
-            max: f.numeric!.max,
-            mean: f.numeric!.mean,
-          }));
-        const categorical = eda.fields
-          .filter((f) => !!f.categorical)
-          .slice(0, 2)
-          .map((f) => ({
-            field: f.field,
-            top: (f.categorical ?? []).slice(0, 5),
-          }));
-        edaSnippet = `EDA rows=${eda.rowCount
-          }, fields=${eda.fields.length
-          }, timeField=${eda.detectedTimeField
-          }; numeric=${JSON.stringify(numeric)}, categorical=${JSON.stringify(
-            categorical
-          )}`;
-      }
-    } catch { }
-
-    const { output } = await prompt({
-      eventData: `${input.eventData}\n\nEDA:${edaSnippet}`,
-      eventType: input.eventType,
-    });
-    return output!;
-  }
-);
