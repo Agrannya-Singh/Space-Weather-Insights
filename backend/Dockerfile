@@ -10,8 +10,9 @@ RUN apt-get update -qq && apt-get install -y \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install R packages
-RUN R -e "install.packages(c('plumber', 'jsonlite', 'ggplot2', 'dplyr', 'logger'), repos='https://cloud.r-project.org/')"
+# Install R packages and VERIFY installation
+RUN R -e "install.packages(c('plumber', 'jsonlite', 'ggplot2', 'dplyr', 'logger'), repos='https://cloud.r-project.org/')" \
+    && R -e "if (!all(c('plumber', 'jsonlite', 'ggplot2', 'dplyr', 'logger') %in% installed.packages())) stop('Package installation failed')"
 
 # Set the working directory
 WORKDIR /app
