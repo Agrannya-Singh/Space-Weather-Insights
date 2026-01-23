@@ -40,7 +40,7 @@ export async function getSpaceWeatherData({ eventType, startDate, endDate, locat
   const cachedData = await getCache(cacheKey);
   if (cachedData) {
     console.log('Serving from cache');
-    return cachedData;
+    return serializeData(cachedData);
   }
 
   // If not in the cache, fetch from the NASA API.
@@ -60,5 +60,9 @@ export async function getSpaceWeatherData({ eventType, startDate, endDate, locat
   // Store the new data in the cache.
   await setCache(cacheKey, data);
 
-  return data;
+  return serializeData(data);
+}
+//prevents [object][Object] issues in graph
+function serializeData(data: any) {
+  return JSON.parse(JSON.stringify(data));
 }
