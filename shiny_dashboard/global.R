@@ -1,19 +1,24 @@
 # global.R - Shared resources and setup for Shiny Dashboard
 
-library(shiny)
-library(bslib)
-library(ggplot2)
-library(DT)
-library(httr2)
-library(jsonlite)
-library(dplyr)
-library(purrr)
-library(tidyr)
-library(lubridate)
-library(logger)
+# Suppress startup messages for cleaner logs
+suppressPackageStartupMessages({
+  library(shiny)
+  library(bslib)
+  library(ggplot2)
+  library(DT)
+  library(httr2)
+  library(jsonlite)
+  library(dplyr)
+  library(purrr)
+  library(tidyr)
+  library(lubridate)
+  library(logger)
+  library(plotly)
+})
 
-# Configure logger
-log_threshold(DEBUG)
+# Configure professional structured logging
+log_layout(layout_json())
+log_threshold(INFO) # Set to INFO for production-grade noise reduction
 
 # Source modular R files
 source("R/nasa_api.R")

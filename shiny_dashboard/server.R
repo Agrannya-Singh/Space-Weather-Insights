@@ -25,8 +25,15 @@ server <- function(input, output, session) {
         state$eda <- analyze_dataset(df)
         
         # Update dropdown choices
+        # Filter out ID columns and other noise for cleaner UI
+        valid_cols <- names(df)
+        ignore_patterns <- "ID$|Id$|url$|link$|Time$|Name$|Note$|Enlil$|AU$|Catalog$"
+        
         num_fields <- names(Filter(is.numeric, df))
+        num_fields <- num_fields[!grepl(ignore_patterns, num_fields, ignore.case = TRUE)]
+        
         cat_fields <- names(Filter(function(x) is.character(x) || is.factor(x) || is.logical(x), df))
+        cat_fields <- cat_fields[!grepl(ignore_patterns, cat_fields, ignore.case = TRUE)]
         
         updateSelectInput(session, "num_field", choices = num_fields)
         updateSelectInput(session, "cat_field", choices = cat_fields)
@@ -85,6 +92,19 @@ server <- function(input, output, session) {
     }
     req(dt_field)
     render_timeseries_plot(state$data, dt_field)
+  })
+  
+  output$globe_plot <- renderPlotly({
+    req(state$data)
+    render_globe_plot(state$data)
+  })
+  
+  # Log session start
+  log_info("Session started")
+  
+  # Log session end
+  onStop(function() {
+    log_info("Session ended")
   })
   
   output$raw_data_table <- renderDT({

@@ -83,12 +83,27 @@ ui <- page_sidebar(
       ),
       
       nav_panel(
+        "3D Analysis",
+        card(
+          card_header("3D Solar Event Map"),
+          plotlyOutput("globe_plot", height = "600px"),
+          full_screen = TRUE
+        )
+      ),
+      
+      nav_panel(
         "Data Explorer",
         card(
           card_header("Raw Data View"),
           DTOutput("raw_data_table")
         )
       )
+    ),
+    
+    tags$footer(
+      class = "mt-auto py-3 text-center text-muted small",
+      style = "border-top: 1px solid rgba(255,255,255,0.1); margin-top: 2rem;",
+      HTML("&copy; 2026 Space Weather Insights. Powered by NASA DONKI & R Shiny. <br> Professional Grade Analytics.")
     )
   )
 )
