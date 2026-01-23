@@ -101,6 +101,22 @@ This repo includes a `Jenkinsfile` that runs:
 
 Set up Jenkins credentials for your registry and configure environment variables as needed.
 
+## R Shiny Dashboard
+
+A secondary, modular dashboard built with R Shiny is available in the `shiny_dashboard` directory. It provides deep statistical EDA and visualizations using `ggplot2` and `bslib`.
+
+### How to Run:
+
+1. Ensure R is installed along with the following packages:
+   ```r
+   install.packages(c("shiny", "bslib", "ggplot2", "DT", "httr2", "jsonlite", "dplyr", "logger", "bsicons", "purrr", "tidyr", "lubridate"))
+   ```
+2. Navigate to the project root and run:
+   ```bash
+   Rscript shiny_dashboard/app.R
+   ```
+3. Or open `shiny_dashboard/app.R` in RStudio and click "Run App".
+
 
 ***
 
