@@ -1,0 +1,72 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - heading "Exploratory Data Analysis" [level=2] [ref=e3]
+    - generic [ref=e4]:
+      - generic [ref=e6]: Load Data
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]: "Format:"
+          - combobox [ref=e10]:
+            - option "JSON"
+            - option "CSV" [selected]
+          - button "Choose File" [ref=e11]
+          - button "Analyze" [active] [ref=e12] [cursor=pointer]
+        - textbox "Paste CSV text here" [ref=e13]: id,name,value 1,Event A,100 2,Event B,200
+    - generic [ref=e14]:
+      - tablist [ref=e15]:
+        - tab "Overview" [selected] [ref=e16] [cursor=pointer]
+        - tab "Numeric" [ref=e17] [cursor=pointer]
+        - tab "Categorical" [ref=e18] [cursor=pointer]
+        - tab "Time Series" [ref=e19] [cursor=pointer]
+        - tab "Correlation" [ref=e20] [cursor=pointer]
+      - tabpanel "Overview" [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: Dataset Summary
+            - button "Download EDA JSON" [ref=e26] [cursor=pointer]
+          - generic [ref=e28]:
+            - generic [ref=e29]:
+              - generic [ref=e30]: Rows
+              - generic [ref=e31]: "2"
+            - generic [ref=e32]:
+              - generic [ref=e33]: Fields
+              - generic [ref=e34]: "3"
+            - generic [ref=e35]:
+              - generic [ref=e36]: Time Field
+              - generic [ref=e37]: —
+        - generic [ref=e38]:
+          - generic [ref=e40]: Fields
+          - table [ref=e45]:
+            - rowgroup [ref=e46]:
+              - row "Field Type Missing Cardinality Sample" [ref=e47]:
+                - columnheader "Field" [ref=e48]
+                - columnheader "Type" [ref=e49]
+                - columnheader "Missing" [ref=e50]
+                - columnheader "Cardinality" [ref=e51]
+                - columnheader "Sample" [ref=e52]
+            - rowgroup [ref=e53]:
+              - row "id ignored 0 (0.0%) — \"1\", \"2\"" [ref=e54]:
+                - cell "id" [ref=e55]
+                - cell "ignored" [ref=e56]
+                - cell "0 (0.0%)" [ref=e57]
+                - cell "—" [ref=e58]
+                - cell "\"1\", \"2\"" [ref=e59]
+              - row "name string 0 (0.0%) 2 \"Event A\", \"Event B\"" [ref=e60]:
+                - cell "name" [ref=e61]
+                - cell "string" [ref=e62]
+                - cell "0 (0.0%)" [ref=e63]
+                - cell "2" [ref=e64]
+                - cell "\"Event A\", \"Event B\"" [ref=e65]
+              - row "value integer 0 (0.0%) 2 \"100\", \"200\"" [ref=e66]:
+                - cell "value" [ref=e67]
+                - cell "integer" [ref=e68]
+                - cell "0 (0.0%)" [ref=e69]
+                - cell "2" [ref=e70]
+                - cell "\"100\", \"200\"" [ref=e71]
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e72]
+```
