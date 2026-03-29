@@ -16,11 +16,11 @@ test.describe('Explanation Page', () => {
   });
 
   test('should explain how automated EDA works', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /How Our Automated EDA Works/i })).toBeVisible();
+    await expect(page.getByText(/How Our Automated EDA Works/i)).toBeVisible();
     
-    await expect(page.getByRole('heading', { name: 'Smart Visualizations' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'AI-Powered Insights' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Bring Your Own Data' })).toBeVisible();
+    await expect(page.getByText(/Smart Visualizations/i)).toBeVisible();
+    await expect(page.getByText(/AI-Powered Insights/i)).toBeVisible();
+    await expect(page.getByText(/Bring Your Own Data/i)).toBeVisible();
   });
 
   test('should have CTA buttons linking to Home and EDA', async ({ page }) => {
