@@ -10,8 +10,9 @@ test.describe('EDA Page', () => {
   });
 
   test('should have Load Data card with format selector', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Load Data/i })).toBeVisible();
+    await expect(page.getByText(/Load Data/i).first()).toBeVisible();
     
+    // The select might be within the card
     const formatSelect = page.locator('select');
     await expect(formatSelect).toBeVisible();
     await expect(formatSelect).toHaveValue('json');

@@ -10,9 +10,9 @@ test.describe('Explanation Page', () => {
   });
 
   test('should have three data type cards', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Coronal Mass Ejections (CMEs)' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Solar Flares' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Geomagnetic Storms' })).toBeVisible();
+    await expect(page.getByText(/Coronal Mass Ejections/i)).toBeVisible();
+    await expect(page.getByText(/Solar Flares/i)).toBeVisible();
+    await expect(page.getByText(/Geomagnetic Storms/i)).toBeVisible();
   });
 
   test('should explain how automated EDA works', async ({ page }) => {

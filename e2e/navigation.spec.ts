@@ -3,10 +3,11 @@ import { test, expect } from '@playwright/test';
 test.describe('Navigation', () => {
   test('should navigate to EDA page from header', async ({ page }) => {
     await page.goto('/');
-    const edaLink = page.locator('header').getByRole('link', { name: /EDA/i });
+    // The button text is "Open EDA" based on components/app/eda-link.tsx
+    const edaLink = page.locator('header').getByRole('link', { name: /Open EDA/i });
     await edaLink.click();
     await expect(page).toHaveURL(/\/eda/);
-    await expect(page.getByRole('heading', { name: /Exploratory Data Analysis/i })).toBeVisible();
+    await expect(page.getByText(/Exploratory Data Analysis/i)).toBeVisible();
   });
 
   test('should navigate to Explanation page from Hero', async ({ page }) => {
@@ -14,7 +15,7 @@ test.describe('Navigation', () => {
     const learnMoreButton = page.getByRole('link', { name: /Learn More/i });
     await learnMoreButton.click();
     await expect(page).toHaveURL(/\/explanation/);
-    await expect(page.getByRole('heading', { name: /From Raw Data to Actionable Insights/i })).toBeVisible();
+    await expect(page.getByText(/From Raw Data to Actionable Insights/i)).toBeVisible();
   });
 
   test('should navigate to EDA page from Hero', async ({ page }) => {

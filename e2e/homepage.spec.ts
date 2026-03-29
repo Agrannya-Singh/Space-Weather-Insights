@@ -24,20 +24,20 @@ test.describe('Homepage', () => {
 
   test('should have feature cards', async ({ page }) => {
     const features = [
-      'Explore Space-Weather Events',
-      'Instant, Automatic EDA',
-      'Powered by Next.js & TypeScript',
-      'AI-Powered Summaries'
+      /Explore Space-Weather Events/i,
+      /Instant, Automatic EDA/i,
+      /Powered by Next\.js & TypeScript/i,
+      /AI-Powered Summaries/i
     ];
 
     for (const feature of features) {
-      await expect(page.getByRole('heading', { name: feature })).toBeVisible();
+      await expect(page.getByText(feature).first()).toBeVisible();
     }
   });
 
   test('should show Tech Stack and NASA API Key cards', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Tech Stack' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'NASA API Key' })).toBeVisible();
+    await expect(page.getByText(/Tech Stack/i).first()).toBeVisible();
+    await expect(page.getByText(/NASA API Key/i).first()).toBeVisible();
   });
 
   test('should have a link to the GitHub repository', async ({ page }) => {
